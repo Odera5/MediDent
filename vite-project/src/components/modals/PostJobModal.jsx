@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 export function PostJobModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -15,11 +17,21 @@ export function PostJobModal({ isOpen, onClose }) {
     requirements: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Job posted:", formData);
-    onClose();
-    // Show success notification
+
+    try {
+      const jobsCollection = collection(db, "jobs");
+      await addDoc(jobsCollection, {
+        ...formData,
+        postedDate: new Date().toISOString().split("T")[0],
+      });
+      console.log("Job posted succesfully");
+      onClose();
+      // Show success notification
+    } catch (error) {
+      console.error("Error posting job:", error.message);
+    }
   };
 
   if (!isOpen) return null;

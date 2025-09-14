@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { X, User, Building2 } from "lucide-react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 export function SignupModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("jobseeker");
@@ -19,16 +21,36 @@ export function SignupModal({ isOpen, onClose }) {
     organizationType: "",
   });
 
-  const handleJobseekerSubmit = (e) => {
+  const handleJobseekerSubmit = async (e) => {
     e.preventDefault();
-    console.log("Jobseeker signup:", jobseekerData);
-    onClose();
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        jobseekerData.email,
+        jobseekerData.password
+      );
+      console.log("Jobseeker signup:", userCredential.user);
+      onClose();
+    } catch (error) {
+      console.error("jobseeker signupfailed:", error.message);
+    }
   };
 
-  const handleEmployerSubmit = (e) => {
+  const handleEmployerSubmit = async (e) => {
     e.preventDefault();
-    console.log("Employer signup:", employerData);
-    onClose();
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        employerData.email,
+        employerData.password
+      );
+
+      console.log("Employer signup:", userCredential.user);
+      onClose();
+    } catch (error) {
+      console.error("Employer signup failed:", error.message);
+    }
   };
 
   if (!isOpen) return null;

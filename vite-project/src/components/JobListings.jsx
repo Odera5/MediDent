@@ -1,7 +1,26 @@
-import React from "react";
 import { JobCard } from "./JobCard";
+import React, { useState, useEffect } from "react";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
-export function JobListings({ jobs, onApply, onLoadMore, showLoadMore }) {
+console.log("joblisting.jsx component is being listed");
+export function JobListings({ onApply }) {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const q = query(collection(db, "jobs"), orderBy("postedDate", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const jobsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("Fetched jobs:", jobsData);
+      setJobs(jobsData);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
   return (
     <section className="bg-white">
       <div className="flex justify-between items-center mb-8">
@@ -12,21 +31,16 @@ export function JobListings({ jobs, onApply, onLoadMore, showLoadMore }) {
       </div>
 
       <div>
-        {jobs.map((job) => (
-          <JobCard key={job.id} job={job} onApply={onApply} />
-        ))}
+        {loading ? (
+          <p>Loading jobs...</p>
+        ) : jobs.length > 0 ? (
+          jobs.map((job) => (
+            <JobCard key={job.id} job={job} onApply={onApply} />
+          ))
+        ) : (
+          <p>No jobs found.</p>
+        )}
       </div>
-
-      {showLoadMore && (
-        <div className="text-center mt-8">
-          <button
-            onClick={onLoadMore}
-            className="bg-gray-200 hover:bg-gray-300 text-blue-900 px-8 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5"
-          >
-            Load More Jobs
-          </button>
-        </div>
-      )}
     </section>
   );
 }

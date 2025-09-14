@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../firebaseConfig";
 
 export function ApplyModal({ isOpen, onClose, jobId }) {
   const [formData, setFormData] = useState({
@@ -10,12 +13,34 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
     coverLetter: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Application submitted for job:", jobId, formData);
-    // Handle application logic here
-    onClose();
-    // Show success notification
+    try {
+      const applicationsCollection = collection(db, "applications");
+      const resumeFile = formData.resume;
+
+      let resumeURL = null;
+      if (resumeFile) {
+        const storageRef = ref(storage, `resumes/${jobId}/${resumeFile.name}`);
+        await uploadBytes(storageRef, resumeFile);
+        resumeURL = await getDownloadURL(storageRef);
+      }
+      await addDoc(applicationsCollection, {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        coverLetter: formData.coverLetter,
+        resumeURL: resumeURL,
+        jobId,
+        submittedAt: new Date(),
+      });
+      console.log("Application submitted sucessfully");
+      // Handle application logic here
+      onClose();
+      // Show success notification
+    } catch (error) {
+      console.error("Error submitting application:", error.message);
+    }
   };
 
   const handleFileChange = (e) => {

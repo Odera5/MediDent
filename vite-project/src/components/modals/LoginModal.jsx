@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 export function LoginModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -8,11 +10,17 @@ export function LoginModal({ isOpen, onClose }) {
     rememberMe: false,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login attempt:", formData);
-    // Handle login logic here
-    onClose();
+
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      console.log("Login attempt:", formData);
+      // Handle login logic here
+      onClose();
+    } catch (error) {
+      console.log("Login failed:", error.message);
+    }
   };
 
   if (!isOpen) return null;

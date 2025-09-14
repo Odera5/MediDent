@@ -9,7 +9,7 @@ export function JobCard({ job, onApply }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-blue-900 text-xl font-semibold mb-2">
-            {job.title}
+            {job.jobTitle}
           </h3>
           <p className="text-gray-600 font-medium">{job.hospital}</p>
         </div>
@@ -30,8 +30,7 @@ export function JobCard({ job, onApply }) {
             .replace(/\b\w/g, (l) => l.toUpperCase())}
         </div>
         <div className="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-700 flex items-center gap-2">
-          <DollarSign className="w-4 h-4" />
-          {job.salary}
+          <DollarSign className="w-4 h-4" />${job.minSalary} - ${job.maxSalary}
         </div>
       </div>
 
