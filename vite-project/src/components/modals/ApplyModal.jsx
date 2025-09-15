@@ -21,7 +21,10 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
 
       let resumeURL = null;
       if (resumeFile) {
-        const storageRef = ref(storage, `resumes/${jobId}/${resumeFile.name}`);
+        const storageRef = ref(
+          storage,
+          `resumes/${jobId}/${Date.now()}_${resumeFile.name}`
+        );
         await uploadBytes(storageRef, resumeFile);
         resumeURL = await getDownloadURL(storageRef);
       }
@@ -36,6 +39,13 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
       });
       console.log("Application submitted sucessfully");
       // Handle application logic here
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        resume: null,
+        coverLetter: "",
+      });
       onClose();
       // Show success notification
     } catch (error) {

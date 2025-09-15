@@ -1,12 +1,56 @@
-# React + Vite
+/_Contributor Workflow_/
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+To keep our main branch clean and stable, we use branches + pull requests (PRs).
 
-Currently, two official plugins are available:
+1. Clone the Repository
+   git clone git@github.com:Odera5/MediDent.git
+   cd MediDent
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+2. Create a New Branch
 
-## Expanding the ESLint configuration
+Always create a branch for your work:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+git checkout -b feature/your-feature-name
+
+3. Make Your Changes
+
+Write code, test locally (npm run dev).
+
+Commit changes with clear messages:
+
+git add .
+git commit -m "Added job posting form component"
+
+4. Push to GitHub
+   git push origin feature/your-feature-name
+
+5. Open a Pull Request (PR)
+
+Go to the repo on GitHub.
+
+GitHub will suggest: “Compare & pull request” → click it.
+
+Add a description of what you changed.
+
+Submit the PR.
+Examples:
+
+feature/job-posting-form
+
+fix/firebase-auth-bug 6. Code Review & Merge
+
+Another contributor (or project lead) reviews your PR.
+
+Once approved, it’s merged into main.
+
+🚀 The code is now live in the main branch
+
+Rules to Remember
+
+Never push directly to main (protected).
+
+One feature = one branch.
+
+Write meaningful commit messages.
+
+Small PRs are better than giant PRs (easier to review).
