@@ -44,7 +44,7 @@ export function ApplyModal({ isOpen, onClose, jobId, jobTitle }) {
         submittedAt: new Date(),
       });
 
-      // ✅ Show success toast with jobTitle
+      // success toast with jobTitle
       toast.success(
         `Application for ${jobTitle || "this job"} submitted successfully!`
       );
