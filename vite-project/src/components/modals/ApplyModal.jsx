@@ -3,8 +3,10 @@ import { X } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export function ApplyModal({ isOpen, onClose, jobId }) {
+export function ApplyModal({ isOpen, onClose, jobId, jobTitle }) {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -12,9 +14,12 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
     resume: null,
     coverLetter: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const applicationsCollection = collection(db, "applications");
       const resumeFile = formData.resume;
@@ -28,6 +33,7 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
         await uploadBytes(storageRef, resumeFile);
         resumeURL = await getDownloadURL(storageRef);
       }
+
       await addDoc(applicationsCollection, {
         fullName: formData.fullName,
         email: formData.email,
@@ -37,8 +43,13 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
         jobId,
         submittedAt: new Date(),
       });
-      console.log("Application submitted sucessfully");
-      // Handle application logic here
+
+      // ✅ Show success toast with jobTitle
+      toast.success(
+        `Application for ${jobTitle || "this job"} submitted successfully!`
+      );
+
+      // Reset form
       setFormData({
         fullName: "",
         email: "",
@@ -46,10 +57,11 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
         resume: null,
         coverLetter: "",
       });
-      onClose();
-      // Show success notification
     } catch (error) {
       console.error("Error submitting application:", error.message);
+      toast.error("Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,7 +77,7 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
       <div className="bg-white p-8 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-in slide-in-from-bottom-4 duration-300">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-blue-900 text-2xl font-semibold">
-            Apply for Position
+            Apply for {jobTitle || "Position"}
           </h2>
           <button
             onClick={onClose}
@@ -154,9 +166,10 @@ export function ApplyModal({ isOpen, onClose, jobId }) {
 
           <button
             type="submit"
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all"
+            disabled={isSubmitting}
+            className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
           >
-            Submit Application
+            {isSubmitting ? "Submitting..." : "Submit Application"}
           </button>
         </form>
       </div>

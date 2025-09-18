@@ -1,13 +1,22 @@
 import React, { useState } from "react";
 import { Heart, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function Header({ onLoginClick, onSignupClick }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  // Handles exact + nested active paths
+  const linkClasses = (path) =>
+    `font-medium py-2 transition-colors ${
+      location.pathname === path || location.pathname.startsWith(path + "/")
+        ? "text-teal-400 border-b-2 border-teal-400"
+        : "text-white hover:text-teal-400"
+    }`;
 
   return (
     <header className="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
@@ -22,34 +31,19 @@ export function Header({ onLoginClick, onSignupClick }) {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-8">
-            <Link
-              to="/"
-              className="text-white hover:text-teal-400 font-medium py-2 transition-colors"
-            >
+            <Link to="/" className={linkClasses("/")}>
               Home
             </Link>
-            <Link
-              to="/jobs"
-              className="text-white hover:text-teal-400 font-medium py-2 transition-colors"
-            >
+            <Link to="/jobs" className={linkClasses("/jobs")}>
               Find Jobs
             </Link>
-            <Link
-              to="/hospitals"
-              className="text-white hover:text-teal-400 font-medium py-2 transition-colors"
-            >
+            <Link to="/hospitals" className={linkClasses("/hospitals")}>
               For Hospitals
             </Link>
-            <Link
-              to="/about"
-              className="text-white hover:text-teal-400 font-medium py-2 transition-colors"
-            >
+            <Link to="/about" className={linkClasses("/about")}>
               About
             </Link>
-            <Link
-              to="/contact"
-              className="text-white hover:text-teal-400 font-medium py-2 transition-colors"
-            >
+            <Link to="/contact" className={linkClasses("/contact")}>
               Contact
             </Link>
           </nav>
@@ -85,35 +79,35 @@ export function Header({ onLoginClick, onSignupClick }) {
             <div className="flex flex-col space-y-4 mb-4">
               <Link
                 to="/"
-                className="text-white hover:text-teal-400 transition-colors"
+                className={linkClasses("/")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/jobs"
-                className="text-white hover:text-teal-400 transition-colors"
+                className={linkClasses("/jobs")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Find Jobs
               </Link>
               <Link
                 to="/hospitals"
-                className="text-white hover:text-teal-400 transition-colors"
+                className={linkClasses("/hospitals")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 For Hospitals
               </Link>
               <Link
                 to="/about"
-                className="text-white hover:text-teal-400 transition-colors"
+                className={linkClasses("/about")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 to="/contact"
-                className="text-white hover:text-teal-400 transition-colors"
+                className={linkClasses("/contact")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contact
