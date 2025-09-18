@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { SearchSection } from "./components/SearchSection";
@@ -13,14 +21,8 @@ import { PostJobModal } from "./components/modals/PostJobModal";
 import { Notification } from "./components/Notification";
 import { useJobs } from "./hooks/useJobs";
 
-function App() {
-  const [activeModal, setActiveModal] = useState(null);
-  const [selectedJobId, setSelectedJobId] = useState(null);
-  const [notification, setNotification] = useState({
-    message: "",
-    isVisible: false,
-  });
-
+// ✅ Home Page
+function Home({ onApply }) {
   const {
     jobs,
     filters,
@@ -31,42 +33,13 @@ function App() {
     showLoadMore,
   } = useJobs();
 
-  const openModal = (modalName) => {
-    setActiveModal(modalName);
-  };
-
-  const closeModal = () => {
-    setActiveModal(null);
-    setSelectedJobId(null);
-  };
-
-  const handleApply = (jobId) => {
-    setSelectedJobId(jobId);
-    setActiveModal("apply");
-  };
-
-  /**
-   * Displays a notification message.
-   * @param {string} message The message to display.
-   */
-  /* const showNotification = (message) => {
-    setNotification({ message, isVisible: true });
-  };*/
-
-  const hideNotification = () => {
-    setNotification({ message: "", isVisible: false });
-  };
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header
-        onLoginClick={() => openModal("login")}
-        onSignupClick={() => openModal("signup")}
-      />
-
+    <>
       <Hero
-        onFindJobsClick={() => openModal("signup")}
-        onPostJobClick={() => openModal("postJob")}
+        onFindJobsClick={() => navigate("/signup")}
+        onPostJobClick={() => navigate("/post-job")}
       />
 
       <SearchSection
@@ -79,7 +52,7 @@ function App() {
         <div className="lg:col-span-3">
           <JobListings
             jobs={jobs}
-            onApply={handleApply}
+            onApply={onApply}
             onLoadMore={loadMoreJobs}
             showLoadMore={showLoadMore}
           />
@@ -95,21 +68,83 @@ function App() {
       </main>
 
       <StatsSection />
-      <Footer />
+    </>
+  );
+}
 
-      {/* Modals */}
-      <LoginModal isOpen={activeModal === "login"} onClose={closeModal} />
+// ✅ Wrapper for Apply Modal (with dynamic jobId)
+function ApplyWrapper({ onClose }) {
+  const { jobId } = useParams();
+  return <ApplyModal isOpen={true} onClose={onClose} jobId={jobId} />;
+}
 
-      <SignupModal isOpen={activeModal === "signup"} onClose={closeModal} />
+function App() {
+  const [notification, setNotification] = useState({
+    message: "",
+    isVisible: false,
+  });
+  const navigate = useNavigate();
 
-      <ApplyModal
-        isOpen={activeModal === "apply"}
-        onClose={closeModal}
-        jobId={selectedJobId}
+  const hideNotification = () =>
+    setNotification({ message: "", isVisible: false });
+
+  const handleApply = (jobId) => {
+    navigate(`/apply/${jobId}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* ✅ Header always visible */}
+      <Header
+        onLoginClick={() => navigate("/login")}
+        onSignupClick={() => navigate("/signup")}
       />
 
-      <PostJobModal isOpen={activeModal === "postJob"} onClose={closeModal} />
+      {/* ✅ Routes */}
+      <Routes>
+        <Route path="/" element={<Home onApply={handleApply} />} />
+        <Route
+          path="/login"
+          element={<LoginModal isOpen={true} onClose={() => navigate("/")} />}
+        />
+        <Route
+          path="/signup"
+          element={<SignupModal isOpen={true} onClose={() => navigate("/")} />}
+        />
+        <Route
+          path="/post-job"
+          element={<PostJobModal isOpen={true} onClose={() => navigate("/")} />}
+        />
+        <Route
+          path="/apply/:jobId"
+          element={<ApplyWrapper onClose={() => navigate("/")} />}
+        />
 
+        {/* ✅ Placeholder Pages for Header links */}
+        <Route
+          path="/jobs"
+          element={<h2 className="p-8 text-xl">Jobs Page Coming Soon...</h2>}
+        />
+        <Route
+          path="/hospitals"
+          element={
+            <h2 className="p-8 text-xl">Hospitals Page Coming Soon...</h2>
+          }
+        />
+        <Route
+          path="/about"
+          element={<h2 className="p-8 text-xl">About Page Coming Soon...</h2>}
+        />
+        <Route
+          path="/contact"
+          element={<h2 className="p-8 text-xl">Contact Page Coming Soon...</h2>}
+        />
+      </Routes>
+
+      {/* ✅ Footer always visible */}
+      <Footer />
+
+      {/* ✅ Notifications */}
       <Notification
         message={notification.message}
         isVisible={notification.isVisible}
@@ -119,4 +154,11 @@ function App() {
   );
 }
 
-export default App;
+// ✅ Root Wrapper with Router
+export default function RootApp() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}
