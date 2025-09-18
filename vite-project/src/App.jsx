@@ -21,7 +21,6 @@ import { PostJobModal } from "./components/modals/PostJobModal";
 import { Notification } from "./components/Notification";
 import { useJobs } from "./hooks/useJobs";
 
-// ✅ Home Page
 function Home({ onApply }) {
   const {
     jobs,
@@ -72,7 +71,6 @@ function Home({ onApply }) {
   );
 }
 
-// ✅ Wrapper for Apply Modal (with dynamic jobId)
 function ApplyWrapper({ onClose }) {
   const { jobId } = useParams();
   return <ApplyModal isOpen={true} onClose={onClose} jobId={jobId} />;
@@ -94,13 +92,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ✅ Header always visible */}
       <Header
         onLoginClick={() => navigate("/login")}
         onSignupClick={() => navigate("/signup")}
       />
 
-      {/* ✅ Routes */}
       <Routes>
         <Route path="/" element={<Home onApply={handleApply} />} />
         <Route
@@ -120,7 +116,6 @@ function App() {
           element={<ApplyWrapper onClose={() => navigate("/")} />}
         />
 
-        {/* ✅ Placeholder Pages for Header links */}
         <Route
           path="/jobs"
           element={<h2 className="p-8 text-xl">Jobs Page Coming Soon...</h2>}
@@ -141,10 +136,8 @@ function App() {
         />
       </Routes>
 
-      {/* ✅ Footer always visible */}
       <Footer />
 
-      {/* ✅ Notifications */}
       <Notification
         message={notification.message}
         isVisible={notification.isVisible}
@@ -154,7 +147,6 @@ function App() {
   );
 }
 
-// ✅ Root Wrapper with Router
 export default function RootApp() {
   return (
     <Router>
