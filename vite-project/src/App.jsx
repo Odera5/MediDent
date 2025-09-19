@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useNavigate,
   useParams,
+  useLocation,
 } from "react-router-dom";
 
 import { Header } from "./components/Header";
@@ -18,8 +19,16 @@ import { LoginModal } from "./components/modals/LoginModal";
 import { SignupModal } from "./components/modals/SignupModal";
 import { ApplyModal } from "./components/modals/ApplyModal";
 import { PostJobModal } from "./components/modals/PostJobModal";
-import { Notification } from "./components/Notification";
 import { useJobs } from "./hooks/useJobs";
+
+// ✅ Firebase
+import { db, storage } from "./firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+// ✅ Toastify
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Home({ onApply }) {
   const {
@@ -71,23 +80,47 @@ function Home({ onApply }) {
   );
 }
 
+// ✅ Apply wrapper ensures jobId and jobTitle are passed correctly
 function ApplyWrapper({ onClose }) {
   const { jobId } = useParams();
-  return <ApplyModal isOpen={true} onClose={onClose} jobId={jobId} />;
+  const location = useLocation();
+  const jobTitle = location.state?.jobTitle || "Position";
+
+  const handleSubmit = async (cvFile) => {
+    if (!cvFile) throw new Error("No file selected");
+
+    const storageRef = ref(
+      storage,
+      `resumes/${jobId}/${Date.now()}_${cvFile.name}`
+    );
+    await uploadBytes(storageRef, cvFile);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const applicationsCollection = collection(db, "applications");
+    await addDoc(applicationsCollection, {
+      jobId,
+      resumeURL: downloadURL,
+      submittedAt: new Date(),
+    });
+  };
+
+  return (
+    <ApplyModal
+      isOpen={true}
+      onClose={onClose}
+      jobId={jobId}
+      jobTitle={jobTitle}
+      onSubmit={handleSubmit}
+    />
+  );
 }
 
 function App() {
-  const [notification, setNotification] = useState({
-    message: "",
-    isVisible: false,
-  });
   const navigate = useNavigate();
 
-  const hideNotification = () =>
-    setNotification({ message: "", isVisible: false });
-
-  const handleApply = (jobId) => {
-    navigate(`/apply/${jobId}`);
+  // ✅ Pass both jobId and jobTitle when navigating
+  const handleApply = (jobId, jobTitle) => {
+    navigate(`/apply/${jobId}`, { state: { jobTitle } });
   };
 
   return (
@@ -115,7 +148,6 @@ function App() {
           path="/apply/:jobId"
           element={<ApplyWrapper onClose={() => navigate("/")} />}
         />
-
         <Route
           path="/jobs"
           element={<h2 className="p-8 text-xl">Jobs Page Coming Soon...</h2>}
@@ -138,10 +170,15 @@ function App() {
 
       <Footer />
 
-      <Notification
-        message={notification.message}
-        isVisible={notification.isVisible}
-        onHide={hideNotification}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
       />
     </div>
   );

@@ -21,6 +21,8 @@ export function ApplyModal({ isOpen, onClose, jobId, jobTitle }) {
     setIsSubmitting(true);
 
     try {
+      if (!jobId) throw new Error("Job ID is missing");
+
       const applicationsCollection = collection(db, "applications");
       const resumeFile = formData.resume;
 
@@ -44,12 +46,10 @@ export function ApplyModal({ isOpen, onClose, jobId, jobTitle }) {
         submittedAt: new Date(),
       });
 
-      // success toast with jobTitle
       toast.success(
         `Application for ${jobTitle || "this job"} submitted successfully!`
       );
 
-      // Reset form
       setFormData({
         fullName: "",
         email: "",
