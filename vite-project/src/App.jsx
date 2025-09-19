@@ -21,12 +21,12 @@ import { ApplyModal } from "./components/modals/ApplyModal";
 import { PostJobModal } from "./components/modals/PostJobModal";
 import { useJobs } from "./hooks/useJobs";
 
-// ✅ Firebase
+//  Firebase
 import { db, storage } from "./firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// ✅ Toastify
+// Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -80,7 +80,7 @@ function Home({ onApply }) {
   );
 }
 
-// ✅ Apply wrapper ensures jobId and jobTitle are passed correctly
+// Apply wrapper ensures jobId and jobTitle are passed correctly
 function ApplyWrapper({ onClose }) {
   const { jobId } = useParams();
   const location = useLocation();
@@ -118,7 +118,7 @@ function ApplyWrapper({ onClose }) {
 function App() {
   const navigate = useNavigate();
 
-  // ✅ Pass both jobId and jobTitle when navigating
+  // Pass both jobId and jobTitle when navigating
   const handleApply = (jobId, jobTitle) => {
     navigate(`/apply/${jobId}`, { state: { jobTitle } });
   };
