@@ -6,6 +6,7 @@ import {
   useNavigate,
   useParams,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 
 import { Header } from "./components/Header";
@@ -20,11 +21,15 @@ import { SignupModal } from "./components/modals/SignupModal";
 import { ApplyModal } from "./components/modals/ApplyModal";
 import { PostJobModal } from "./components/modals/PostJobModal";
 import { useJobs } from "./hooks/useJobs";
+import { Contact } from "./components/pages/Contact";
+import { About } from "./components/pages/About";
+import { Dashboard } from "./components/dashboard/Dashboard";
 
-//  Firebase
-import { db, storage } from "./firebaseConfig";
+// Firebase
+import { db, storage, auth } from "./firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 // Toastify
 import { ToastContainer } from "react-toastify";
@@ -117,6 +122,9 @@ function ApplyWrapper({ onClose }) {
 
 function App() {
   const navigate = useNavigate();
+  const [currentUser, loadingUser] = useAuthState(auth);
+
+  if (loadingUser) return <p className="p-8 text-center">Loading user...</p>;
 
   // Pass both jobId and jobTitle when navigating
   const handleApply = (jobId, jobTitle) => {
@@ -128,6 +136,7 @@ function App() {
       <Header
         onLoginClick={() => navigate("/login")}
         onSignupClick={() => navigate("/signup")}
+        currentUser={currentUser}
       />
 
       <Routes>
@@ -158,13 +167,19 @@ function App() {
             <h2 className="p-8 text-xl">Hospitals Page Coming Soon...</h2>
           }
         />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+
+        {/* Protected Dashboard Route */}
         <Route
-          path="/about"
-          element={<h2 className="p-8 text-xl">About Page Coming Soon...</h2>}
-        />
-        <Route
-          path="/contact"
-          element={<h2 className="p-8 text-xl">Contact Page Coming Soon...</h2>}
+          path="/dashboard/*"
+          element={
+            currentUser ? (
+              <Dashboard currentUser={currentUser} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
       </Routes>
 

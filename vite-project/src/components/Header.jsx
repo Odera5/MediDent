@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Heart, Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-export function Header({ onLoginClick, onSignupClick }) {
+export function Header({ onLoginClick, onSignupClick, currentUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -10,7 +10,6 @@ export function Header({ onLoginClick, onSignupClick }) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Handles exact + nested active paths
   const linkClasses = (path) =>
     `font-medium py-2 transition-colors ${
       location.pathname === path || location.pathname.startsWith(path + "/")
@@ -46,23 +45,32 @@ export function Header({ onLoginClick, onSignupClick }) {
             <Link to="/contact" className={linkClasses("/contact")}>
               Contact
             </Link>
+
+            {/* Show Dashboard link if logged in */}
+            {currentUser && (
+              <Link to="/dashboard" className={linkClasses("/dashboard")}>
+                Dashboard
+              </Link>
+            )}
           </nav>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex space-x-4">
-            <button
-              onClick={onLoginClick}
-              className="px-6 py-3 border-2 border-white text-white hover:bg-white hover:text-blue-900 rounded-lg font-medium transition-all transform hover:-translate-y-0.5"
-            >
-              Login
-            </button>
-            <button
-              onClick={onSignupClick}
-              className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              Sign Up
-            </button>
-          </div>
+          {!currentUser && (
+            <div className="hidden md:flex space-x-4">
+              <button
+                onClick={onLoginClick}
+                className="px-6 py-3 border-2 border-white text-white hover:bg-white hover:text-blue-900 rounded-lg font-medium transition-all transform hover:-translate-y-0.5"
+              >
+                Login
+              </button>
+              <button
+                onClick={onSignupClick}
+                className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button
@@ -112,27 +120,39 @@ export function Header({ onLoginClick, onSignupClick }) {
               >
                 Contact
               </Link>
+
+              {currentUser && (
+                <Link
+                  to="/dashboard"
+                  className={linkClasses("/dashboard")}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => {
-                  onLoginClick();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex-1 px-4 py-2 border border-white text-white hover:bg-white hover:text-blue-900 rounded-lg transition-all"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => {
-                  onSignupClick();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all"
-              >
-                Sign Up
-              </button>
-            </div>
+            {!currentUser && (
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    onLoginClick();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex-1 px-4 py-2 border border-white text-white hover:bg-white hover:text-blue-900 rounded-lg transition-all"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    onSignupClick();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
