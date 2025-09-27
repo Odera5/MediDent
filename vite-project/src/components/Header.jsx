@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Heart, Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebaseConfig.js"; // make sure path points to your firebase config
 
 export function Header({ onLoginClick, onSignupClick, currentUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -8,6 +10,15 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "/"; // redirect after logout
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const linkClasses = (path) =>
@@ -46,11 +57,19 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
               Contact
             </Link>
 
-            {/* Show Dashboard link if logged in */}
+            {/* Show Dashboard + Logout if logged in */}
             {currentUser && (
-              <Link to="/dashboard" className={linkClasses("/dashboard")}>
-                Dashboard
-              </Link>
+              <>
+                <Link to="/dashboard" className={linkClasses("/dashboard")}>
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 border-2 border-white text-white hover:bg-white hover:text-blue-900 rounded-lg font-medium transition-all"
+                >
+                  Logout
+                </button>
+              </>
             )}
           </nav>
 
@@ -122,15 +141,27 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
               </Link>
 
               {currentUser && (
-                <Link
-                  to="/dashboard"
-                  className={linkClasses("/dashboard")}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard"
+                    className={linkClasses("/dashboard")}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-2 border border-white text-white hover:bg-white hover:text-blue-900 rounded-lg transition-all"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
             </div>
+
             {!currentUser && (
               <div className="flex space-x-2">
                 <button

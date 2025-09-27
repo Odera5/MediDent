@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 export function LoginModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -14,12 +16,32 @@ export function LoginModal({ isOpen, onClose }) {
     e.preventDefault();
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      console.log("Login attempt:", formData);
-      // Handle login logic here
-      onClose();
+      // Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
+
+      // Fetch profile from Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log("User role:", userData.role);
+
+        toast.success(`Welcome back, ${userData.fullName || "User"}!`);
+        onClose();
+      } else {
+        console.warn("No profile found for this user in Firestore.");
+        toast.error("Profile not found. Please contact support.");
+
+        await signOut(auth);
+      }
     } catch (error) {
-      console.log("Login failed:", error.message);
+      console.error("Login failed:", error.message);
+      toast.error(error.message);
     }
   };
 

@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { X, User, Building2 } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 export function SignupModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("jobseeker");
+  const [loading, setLoading] = useState(false);
+
   const [jobseekerData, setJobseekerData] = useState({
     fullName: "",
     email: "",
@@ -12,6 +16,7 @@ export function SignupModal({ isOpen, onClose }) {
     profession: "",
     experience: "",
   });
+
   const [employerData, setEmployerData] = useState({
     contactName: "",
     email: "",
@@ -23,6 +28,7 @@ export function SignupModal({ isOpen, onClose }) {
 
   const handleJobseekerSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -30,26 +36,60 @@ export function SignupModal({ isOpen, onClose }) {
         jobseekerData.email,
         jobseekerData.password
       );
-      console.log("Jobseeker signup:", userCredential.user);
+      const user = userCredential.user;
+
+      // Firestore profile
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        fullName: jobseekerData.fullName,
+        email: jobseekerData.email,
+        profession: jobseekerData.profession,
+        experience: jobseekerData.experience,
+        role: "jobSeeker",
+        createdAt: new Date(),
+      });
+
+      toast.success("Jobseeker account created successfully!");
       onClose();
     } catch (error) {
-      console.error("jobseeker signupfailed:", error.message);
+      console.error("Jobseeker signup failed:", error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEmployerSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         employerData.email,
         employerData.password
       );
+      const user = userCredential.user;
 
-      console.log("Employer signup:", userCredential.user);
+      // Firestore profile
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        contactName: employerData.contactName,
+        email: employerData.email,
+        organizationName: employerData.organizationName,
+        location: employerData.location,
+        organizationType: employerData.organizationType,
+        role: "employer",
+        createdAt: new Date(),
+      });
+
+      toast.success("Employer account created successfully!");
       onClose();
     } catch (error) {
       console.error("Employer signup failed:", error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,6 +110,7 @@ export function SignupModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* Tab Buttons */}
         <div className="flex bg-gray-100 rounded-lg p-1 mb-8">
           <button
             className={`flex-1 py-3 px-4 rounded-md font-medium transition-all flex items-center justify-center gap-2 ${
@@ -95,244 +136,169 @@ export function SignupModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* Jobseeker Form */}
         {activeTab === "jobseeker" && (
-          <form onSubmit={handleJobseekerSubmit}>
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={jobseekerData.fullName}
-                onChange={(e) =>
-                  setJobseekerData({
-                    ...jobseekerData,
-                    fullName: e.target.value,
-                  })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={jobseekerData.email}
-                onChange={(e) =>
-                  setJobseekerData({ ...jobseekerData, email: e.target.value })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={jobseekerData.password}
-                onChange={(e) =>
-                  setJobseekerData({
-                    ...jobseekerData,
-                    password: e.target.value,
-                  })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Create a password"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-blue-900 font-medium mb-2">
-                  Profession
-                </label>
-                <select
-                  value={jobseekerData.profession}
-                  onChange={(e) =>
-                    setJobseekerData({
-                      ...jobseekerData,
-                      profession: e.target.value,
-                    })
-                  }
-                  className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                  required
-                >
-                  <option value="">Select Profession</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="nurse">Nurse</option>
-                  <option value="pharmacist">Pharmacist</option>
-                  <option value="technician">Medical Technician</option>
-                  <option value="therapist">Therapist</option>
-                  <option value="administrator">
-                    Healthcare Administrator
-                  </option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-blue-900 font-medium mb-2">
-                  Experience
-                </label>
-                <select
-                  value={jobseekerData.experience}
-                  onChange={(e) =>
-                    setJobseekerData({
-                      ...jobseekerData,
-                      experience: e.target.value,
-                    })
-                  }
-                  className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                  required
-                >
-                  <option value="">Years of Experience</option>
-                  <option value="0-2">0-2 years</option>
-                  <option value="3-5">3-5 years</option>
-                  <option value="6-10">6-10 years</option>
-                  <option value="10+">10+ years</option>
-                </select>
-              </div>
-            </div>
-
+          <form onSubmit={handleJobseekerSubmit} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={jobseekerData.fullName}
+              onChange={(e) =>
+                setJobseekerData({ ...jobseekerData, fullName: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={jobseekerData.email}
+              onChange={(e) =>
+                setJobseekerData({ ...jobseekerData, email: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={jobseekerData.password}
+              onChange={(e) =>
+                setJobseekerData({ ...jobseekerData, password: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <select
+              value={jobseekerData.profession}
+              onChange={(e) =>
+                setJobseekerData({
+                  ...jobseekerData,
+                  profession: e.target.value,
+                })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            >
+              <option value="">Select Profession</option>
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse</option>
+              <option value="pharmacist">Pharmacist</option>
+              <option value="technician">Medical Technician</option>
+              <option value="therapist">Therapist</option>
+              <option value="administrator">Healthcare Administrator</option>
+              <option value="other">Other</option>
+            </select>
+            <select
+              value={jobseekerData.experience}
+              onChange={(e) =>
+                setJobseekerData({
+                  ...jobseekerData,
+                  experience: e.target.value,
+                })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            >
+              <option value="">Years of Experience</option>
+              <option value="0-2">0-2 years</option>
+              <option value="3-5">3-5 years</option>
+              <option value="6-10">6-10 years</option>
+              <option value="10+">10+ years</option>
+            </select>
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all"
             >
-              Create Job Seeker Account
+              {loading ? "Creating..." : "Create Job Seeker Account"}
             </button>
           </form>
         )}
 
+        {/* Employer Form */}
         {activeTab === "employer" && (
-          <form onSubmit={handleEmployerSubmit}>
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Contact Name
-              </label>
-              <input
-                type="text"
-                value={employerData.contactName}
-                onChange={(e) =>
-                  setEmployerData({
-                    ...employerData,
-                    contactName: e.target.value,
-                  })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Your full name"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Work Email
-              </label>
-              <input
-                type="email"
-                value={employerData.email}
-                onChange={(e) =>
-                  setEmployerData({ ...employerData, email: e.target.value })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="your.email@hospital.com"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={employerData.password}
-                onChange={(e) =>
-                  setEmployerData({ ...employerData, password: e.target.value })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Create a secure password"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-blue-900 font-medium mb-2">
-                Hospital/Organization Name
-              </label>
-              <input
-                type="text"
-                value={employerData.organizationName}
-                onChange={(e) =>
-                  setEmployerData({
-                    ...employerData,
-                    organizationName: e.target.value,
-                  })
-                }
-                className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                placeholder="Enter hospital name"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-blue-900 font-medium mb-2">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={employerData.location}
-                  onChange={(e) =>
-                    setEmployerData({
-                      ...employerData,
-                      location: e.target.value,
-                    })
-                  }
-                  className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                  placeholder="City, State"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-900 font-medium mb-2">
-                  Hospital Type
-                </label>
-                <select
-                  value={employerData.organizationType}
-                  onChange={(e) =>
-                    setEmployerData({
-                      ...employerData,
-                      organizationType: e.target.value,
-                    })
-                  }
-                  className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="public">Public Hospital</option>
-                  <option value="private">Private Hospital</option>
-                  <option value="teaching">Teaching Hospital</option>
-                  <option value="specialty">Specialty Center</option>
-                  <option value="clinic">Clinic</option>
-                </select>
-              </div>
-            </div>
-
+          <form onSubmit={handleEmployerSubmit} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Contact Name"
+              value={employerData.contactName}
+              onChange={(e) =>
+                setEmployerData({
+                  ...employerData,
+                  contactName: e.target.value,
+                })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="email"
+              placeholder="Work Email"
+              value={employerData.email}
+              onChange={(e) =>
+                setEmployerData({ ...employerData, email: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={employerData.password}
+              onChange={(e) =>
+                setEmployerData({ ...employerData, password: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="Hospital/Organization Name"
+              value={employerData.organizationName}
+              onChange={(e) =>
+                setEmployerData({
+                  ...employerData,
+                  organizationName: e.target.value,
+                })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="Location (City, State)"
+              value={employerData.location}
+              onChange={(e) =>
+                setEmployerData({ ...employerData, location: e.target.value })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            />
+            <select
+              value={employerData.organizationType}
+              onChange={(e) =>
+                setEmployerData({
+                  ...employerData,
+                  organizationType: e.target.value,
+                })
+              }
+              required
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg"
+            >
+              <option value="">Select Hospital Type</option>
+              <option value="public">Public Hospital</option>
+              <option value="private">Private Hospital</option>
+              <option value="teaching">Teaching Hospital</option>
+              <option value="specialty">Specialty Center</option>
+              <option value="clinic">Clinic</option>
+            </select>
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all"
             >
-              Create Employer Account
+              {loading ? "Creating..." : "Create Employer Account"}
             </button>
           </form>
         )}
