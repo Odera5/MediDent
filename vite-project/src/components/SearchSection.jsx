@@ -9,12 +9,23 @@ export function SearchSection({ filters, onFiltersChange, onSearch }) {
     });
   };
 
+  const clearFilters = () => {
+    onFiltersChange({
+      search: "",
+      location: "",
+      specialty: "",
+    });
+  };
+
   return (
     <section className="bg-gray-50 py-8 border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-8">
         <div className="bg-white p-8 rounded-xl shadow-md">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div className="flex flex-col">
+          {/* Flex container instead of grid */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            
+            {/* Job Title / Keywords */}
+            <div className="flex flex-col flex-1">
               <label className="font-medium text-blue-900 mb-2">
                 Job Title or Keywords
               </label>
@@ -30,48 +41,51 @@ export function SearchSection({ filters, onFiltersChange, onSearch }) {
               </div>
             </div>
 
-            <div className="flex flex-col">
+            {/* Location */}
+            <div className="flex flex-col flex-1">
               <label className="font-medium text-blue-900 mb-2">Location</label>
-              <select
+              <input
+                type="text"
                 value={filters.location}
                 onChange={(e) => updateFilter("location", e.target.value)}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-              >
-                <option value="">All Locations</option>
-                <option value="lagos">Lagos</option>
-                <option value="abuja">Abuja</option>
-                <option value="kano">Kano</option>
-                <option value="port-harcourt">Port Harcourt</option>
-                <option value="ibadan">Ibadan</option>
-                <option value="kaduna">Kaduna</option>
-              </select>
+                placeholder="e.g., Lagos, Abuja, Kano"
+              />
             </div>
 
-            <div className="flex flex-col">
-              <label className="font-medium text-blue-900 mb-2">
-                Specialty
-              </label>
-              <select
+            {/* Specialty */}
+            <div className="flex flex-col flex-1">
+              <label className="font-medium text-blue-900 mb-2">Specialty</label>
+              <input
+                type="text"
                 value={filters.specialty}
                 onChange={(e) => updateFilter("specialty", e.target.value)}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-              >
-                <option value="">All Specialties</option>
-                <option value="cardiology">Cardiology</option>
-                <option value="emergency">Emergency Medicine</option>
-                <option value="nursing">Nursing</option>
-                <option value="surgery">Surgery</option>
-                <option value="pediatrics">Pediatrics</option>
-                <option value="radiology">Radiology</option>
-              </select>
+                placeholder="e.g., Surgery, Nursing, Radiology"
+              />
             </div>
 
-            <button
-              onClick={onSearch}
-              className="px-8 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              Search Jobs
-            </button>
+            {/* Buttons */}
+            <div className="flex flex-col flex-1">
+              <label className="font-medium text-blue-900 mb-2 invisible">
+                Actions
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={onSearch}
+                  className="flex-1 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                  Search Jobs
+                </button>
+                <button
+                  onClick={clearFilters}
+                  className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-blue-900 rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

@@ -1,46 +1,47 @@
 import React from "react";
 import { Heart } from "lucide-react";
+import { Link } from "react-router-dom"; 
 
 export function Footer() {
   const footerSections = [
     {
       title: "For Job Seekers",
       links: [
-        "Browse Jobs",
-        "Create Profile",
-        "Career Resources",
-        "Resume Builder",
-        "Interview Tips",
+        { name: "Browse Jobs", path: "/jobs" },
+        { name: "Create Profile", path: "/profile/create" },
+        { name: "Career Resources", path: "/resources/career" },
+        { name: "Resume Builder", path: "/resume-builder" },
+        { name: "Interview Tips", path: "/resources/interview-tips" },
       ],
     },
     {
       title: "For Employers",
       links: [
-        "Post a Job",
-        "Search Candidates",
-        "Pricing Plans",
-        "Recruitment Services",
-        "Employer Dashboard",
+        { name: "Post a Job", path: "/employers/post-job" },
+        { name: "Search Candidates", path: "/employers/search" },
+        { name: "Pricing Plans", path: "/pricing" },
+        { name: "Recruitment Services", path: "/employers/services" },
+        { name: "Employer Dashboard", path: "/employers/dashboard" },
       ],
     },
     {
       title: "Resources",
       links: [
-        "Salary Guide",
-        "Industry Reports",
-        "Healthcare News",
-        "Blog",
-        "FAQ",
+        { name: "Salary Guide", path: "/resources/salary-guide" },
+        { name: "Industry Reports", path: "/resources/industry-reports" },
+        { name: "Healthcare News", path: "/news" },
+        { name: "Blog", path: "/blog" },
+        { name: "FAQ", path: "/faq" },
       ],
     },
     {
       title: "Company",
       links: [
-        "About Us",
-        "Help Center",
-        "Contact Support",
-        "Privacy Policy",
-        "Terms of Service",
+        { name: "About Us", path: "/about" },
+        { name: "Help Center", path: "/help" },
+        { name: "Contact Support", path: "/contact" },
+        { name: "Privacy Policy", path: "/privacy" },
+        { name: "Terms of Service", path: "/terms" },
       ],
     },
   ];
@@ -48,6 +49,7 @@ export function Footer() {
   return (
     <footer className="bg-blue-900 text-white py-12">
       <div className="max-w-6xl mx-auto px-8">
+        {/* Footer links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {footerSections.map((section, index) => (
             <div key={index}>
@@ -55,12 +57,12 @@ export function Footer() {
               <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a
-                      href="#"
+                    <Link
+                      to={link.path}
                       className="text-white/80 hover:text-teal-400 transition-colors"
                     >
-                      {link}
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -68,6 +70,7 @@ export function Footer() {
           ))}
         </div>
 
+        {/* Branding + copyright */}
         <div className="border-t border-white/20 pt-8 text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="w-8 h-8 bg-teal-500 rounded-full mr-2 flex items-center justify-center">
@@ -76,7 +79,7 @@ export function Footer() {
             <span className="text-2xl font-semibold">LumiaGlobe</span>
           </div>
           <p className="text-white/80">
-            &copy; 2025 LumiaGlobe. All rights reserved. Empowering healthcare
+            &copy; {new Date().getFullYear()} LumiaGlobe. All rights reserved. Empowering healthcare
             careers across Nigeria.
           </p>
         </div>

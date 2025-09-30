@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
-export function LoginModal({ isOpen, onClose }) {
+export function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,7 +22,14 @@ export function LoginModal({ isOpen, onClose }) {
     e.preventDefault();
 
     try {
-      // Sign in with Firebase Auth
+      // ✅ Set persistence based on "remember me"
+      const persistence = formData.rememberMe
+        ? browserLocalPersistence
+        : browserSessionPersistence;
+
+      await setPersistence(auth, persistence);
+
+      // ✅ Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(
         auth,
         formData.email,
@@ -24,7 +37,7 @@ export function LoginModal({ isOpen, onClose }) {
       );
       const user = userCredential.user;
 
-      // Fetch profile from Firestore
+      // ✅ Fetch profile from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
 
       if (userDoc.exists()) {
@@ -32,7 +45,11 @@ export function LoginModal({ isOpen, onClose }) {
         console.log("User role:", userData.role);
 
         toast.success(`Welcome back, ${userData.fullName || "User"}!`);
+
         onClose();
+        if (onLoginSuccess) {
+          onLoginSuccess(user); // 🔗 Notify parent (e.g., reopen PostJobModal)
+        }
       } else {
         console.warn("No profile found for this user in Firestore.");
         toast.error("Profile not found. Please contact support.");

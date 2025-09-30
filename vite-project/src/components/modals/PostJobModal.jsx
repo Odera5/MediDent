@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { db, auth } from "../../firebaseConfig";
 
-export function PostJobModal({ isOpen, onClose }) {
+export function PostJobModal({ isOpen, onClose, onOpenLogin }) {
   const [formData, setFormData] = useState({
     jobTitle: "",
     hospital: "",
@@ -20,15 +20,22 @@ export function PostJobModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Require login before posting a job
+    if (!auth.currentUser) {
+      onClose();        // close Post Job modal
+      onOpenLogin?.();  // open Login modal if provided
+      return;
+    }
+
     try {
       const jobsCollection = collection(db, "jobs");
       await addDoc(jobsCollection, {
         ...formData,
+        postedBy: auth.currentUser.uid, // track employer who posted
         postedDate: new Date().toISOString().split("T")[0],
       });
-      console.log("Job posted succesfully");
+      console.log("Job posted successfully");
       onClose();
-      // Show success notification
     } catch (error) {
       console.error("Error posting job:", error.message);
     }

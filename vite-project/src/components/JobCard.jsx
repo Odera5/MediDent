@@ -1,9 +1,14 @@
 import React from "react";
-import { MapPin, Clock, Briefcase, DollarSign } from "lucide-react";
+import { MapPin, Clock, Briefcase, } from "lucide-react";
+import { useState } from "react";
+import { JobDetailsModal } from "./modals/JobDetailsModal";
 
 export function JobCard({ job, onApply }) {
+  const [openDetails, setOpenDetails] = useState(false);
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-8 mb-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-teal-500 relative overflow-hidden group">
+    <>
+
+     <div className="bg-white border border-gray-200 rounded-xl p-8 mb-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-teal-500 relative overflow-hidden group">
       <div className="absolute top-0 left-0 w-1 h-full bg-teal-500 transform scale-y-0 transition-transform duration-300 group-hover:scale-y-100"></div>
 
       <div className="flex justify-between items-start mb-4">
@@ -30,7 +35,7 @@ export function JobCard({ job, onApply }) {
             .replace(/\b\w/g, (l) => l.toUpperCase())}
         </div>
         <div className="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-700 flex items-center gap-2">
-          <DollarSign className="w-4 h-4" />${job.minSalary} - ${job.maxSalary}
+           ₦ {job.minSalary} - ₦ {job.maxSalary}
         </div>
       </div>
 
@@ -43,10 +48,21 @@ export function JobCard({ job, onApply }) {
         >
           Apply Now
         </button>
-        <button className="text-blue-900 hover:text-teal-500 font-medium transition-colors">
-          View Details
-        </button>
+       <button
+            onClick={() => setOpenDetails(true)}
+            className="text-blue-900 hover:text-teal-500 font-medium transition-colors"
+          >
+            View Details
+          </button>
       </div>
     </div>
+
+     {/* Details Modal */}
+      <JobDetailsModal
+        job={job}
+        isOpen={openDetails}
+        onClose={() => setOpenDetails(false)}
+      />
+      </>
   );
 }

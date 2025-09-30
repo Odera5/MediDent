@@ -2,7 +2,7 @@ import React from "react";
 
 export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
   const updateArrayFilter = (key, value, checked) => {
-    const currentArray = filters[key];
+    const currentArray = filters[key] || [];
     let newArray;
 
     if (checked) {
@@ -21,6 +21,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
     <aside className="bg-gray-50 p-8 rounded-xl border border-gray-200 h-fit">
       <h3 className="text-blue-900 text-xl font-semibold mb-6">Filter Jobs</h3>
 
+      {/* Job Type */}
       <div className="mb-8">
         <div className="text-blue-900 font-semibold mb-4 text-lg">Job Type</div>
         <div className="space-y-3">
@@ -36,7 +37,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
             >
               <input
                 type="checkbox"
-                checked={filters.jobTypes.includes(value)}
+                checked={filters.jobTypes?.includes(value) || false}
                 onChange={(e) =>
                   updateArrayFilter("jobTypes", value, e.target.checked)
                 }
@@ -48,6 +49,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
         </div>
       </div>
 
+      {/* Experience Level */}
       <div className="mb-8">
         <div className="text-blue-900 font-semibold mb-4 text-lg">
           Experience Level
@@ -65,7 +67,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
             >
               <input
                 type="checkbox"
-                checked={filters.experienceLevels.includes(value)}
+                checked={filters.experienceLevels?.includes(value) || false}
                 onChange={(e) =>
                   updateArrayFilter("experienceLevels", value, e.target.checked)
                 }
@@ -77,6 +79,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
         </div>
       </div>
 
+      {/* Salary Range */}
       <div className="mb-8">
         <div className="text-blue-900 font-semibold mb-4 text-lg">
           Salary Range
@@ -94,7 +97,7 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
             >
               <input
                 type="checkbox"
-                checked={filters.salaryRanges.includes(value)}
+                checked={filters.salaryRanges?.includes(value) || false}
                 onChange={(e) =>
                   updateArrayFilter("salaryRanges", value, e.target.checked)
                 }
@@ -106,12 +109,15 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
         </div>
       </div>
 
-      <button
-        onClick={onClearFilters}
-        className="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-blue-900 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5"
-      >
-        Clear All Filters
-      </button>
+      {/* Clear Filters Button */}
+      <div className="mt-6">
+        <button
+          onClick={onClearFilters}
+          className="w-full bg-gray-200 hover:bg-gray-300 text-blue-900 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5"
+        >
+          Clear All Filters
+        </button>
+      </div>
     </aside>
   );
 }

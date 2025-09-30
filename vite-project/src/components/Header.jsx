@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Heart, Menu, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebaseConfig.js"; // make sure path points to your firebase config
+import { auth } from "../firebaseConfig.js";
 
 export function Header({ onLoginClick, onSignupClick, currentUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -21,6 +22,15 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
     }
   };
 
+  const handleFindJobsClick = () => {
+    if (location.pathname === "/") {
+      const section = document.getElementById("jobs");
+      if (section) section.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/#jobs");
+    }
+  };
+
   const linkClasses = (path) =>
     `font-medium py-2 transition-colors ${
       location.pathname === path || location.pathname.startsWith(path + "/")
@@ -32,7 +42,8 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
     <header className="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-8">
         <div className="flex justify-between items-center py-4">
-          <div className="flex items-center text-3xl font-bold">
+          {/* Logo */}
+          <div className="flex items-center text-3xl font-bold cursor-pointer">
             <div className="w-8 h-8 bg-teal-500 rounded-full mr-2 flex items-center justify-center">
               <Heart className="w-5 h-5" />
             </div>
@@ -44,10 +55,13 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
             <Link to="/" className={linkClasses("/")}>
               Home
             </Link>
-            <Link to="/jobs" className={linkClasses("/jobs")}>
+            <button
+              onClick={handleFindJobsClick}
+              className={linkClasses("/jobs")}
+            >
               Find Jobs
-            </Link>
-            <Link to="/hospitals" className={linkClasses("/hospitals")}>
+            </button>
+            <Link to="/post-job" className={linkClasses("/hospitals")}>
               For Hospitals
             </Link>
             <Link to="/about" className={linkClasses("/about")}>
@@ -57,7 +71,6 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
               Contact
             </Link>
 
-            {/* Show Dashboard + Logout if logged in */}
             {currentUser && (
               <>
                 <Link to="/dashboard" className={linkClasses("/dashboard")}>
@@ -111,15 +124,17 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
               >
                 Home
               </Link>
-              <Link
-                to="/jobs"
+              <button
+                onClick={() => {
+                  handleFindJobsClick();
+                  setIsMobileMenuOpen(false);
+                }}
                 className={linkClasses("/jobs")}
-                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Find Jobs
-              </Link>
+              </button>
               <Link
-                to="/hospitals"
+                to="/post-job"
                 className={linkClasses("/hospitals")}
                 onClick={() => setIsMobileMenuOpen(false)}
               >

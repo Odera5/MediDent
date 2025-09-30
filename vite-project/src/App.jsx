@@ -24,6 +24,7 @@ import { useJobs } from "./hooks/useJobs";
 import { Contact } from "./components/pages/Contact";
 import { About } from "./components/pages/About";
 import { Dashboard } from "./components/dashboard/Dashboard";
+import { PlaceholderPage } from "./components/pages/PlaceholderPage";
 
 // Firebase
 import { db, storage, auth } from "./firebaseConfig";
@@ -38,11 +39,9 @@ import "react-toastify/dist/ReactToastify.css";
 function Home({ onApply }) {
   const {
     jobs,
-    filters,
-    setFilters,
-    searchJobs,
+
     loadMoreJobs,
-    clearFilters,
+
     showLoadMore,
   } = useJobs();
 
@@ -55,27 +54,17 @@ function Home({ onApply }) {
         onPostJobClick={() => navigate("/post-job")}
       />
 
-      <SearchSection
-        filters={filters}
-        onFiltersChange={setFilters}
-        onSearch={searchJobs}
-      />
-
-      <main className="max-w-6xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* Added id="jobs" here */}
+      <main
+        id="jobs"
+        className="max-w-6xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-4 gap-8"
+      >
         <div className="lg:col-span-3">
           <JobListings
             jobs={jobs}
             onApply={onApply}
             onLoadMore={loadMoreJobs}
             showLoadMore={showLoadMore}
-          />
-        </div>
-
-        <div className="lg:col-span-1">
-          <Sidebar
-            filters={filters}
-            onFiltersChange={setFilters}
-            onClearFilters={clearFilters}
           />
         </div>
       </main>
@@ -181,6 +170,30 @@ function App() {
             )
           }
         />
+
+
+
+
+        <Route path="/jobs" element={<PlaceholderPage />} />
+          <Route path="/profile/create" element={<PlaceholderPage />} />
+          <Route path="/resources/career" element={<PlaceholderPage />} />
+          <Route path="/resume-builder" element={<PlaceholderPage />} />
+          <Route path="/resources/interview-tips" element={<PlaceholderPage />} />
+          <Route path="/employers/post-job" element={<PlaceholderPage />} />
+          <Route path="/employers/search" element={<PlaceholderPage />} />
+          <Route path="/pricing" element={<PlaceholderPage />} />
+          <Route path="/employers/services" element={<PlaceholderPage />} />
+          <Route path="/employers/dashboard" element={<PlaceholderPage />} />
+          <Route path="/resources/salary-guide" element={<PlaceholderPage />} />
+          <Route path="/resources/industry-reports" element={<PlaceholderPage />} />
+          <Route path="/news" element={<PlaceholderPage />} />
+          <Route path="/blog" element={<PlaceholderPage />} />
+          <Route path="/faq" element={<PlaceholderPage />} />
+          <Route path="/about" element={<PlaceholderPage />} />
+          <Route path="/help" element={<PlaceholderPage />} />
+          <Route path="/contact" element={<PlaceholderPage />} />
+          <Route path="/privacy" element={<PlaceholderPage />} />
+          <Route path="/terms" element={<PlaceholderPage />} />
       </Routes>
 
       <Footer />
