@@ -103,6 +103,7 @@ function ApplyWrapper({ onClose }) {
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [currentUser, loadingUser] = useAuthState(auth);
 
@@ -134,13 +135,21 @@ function App() {
               onSuccessRedirect={(redirectPath) =>
                 navigate(redirectPath || "/")
               }
+              onOpenSignup={() => navigate("/signup")} // 🔑 allow switch to signup
             />
           }
         />
 
+        {/* Signup with redirect support */}
         <Route
           path="/signup"
-          element={<SignupModal isOpen={true} onClose={() => navigate("/")} />}
+          element={
+            <SignupModal
+              isOpen={true}
+              onClose={() => navigate("/")}
+              onOpenLogin={() => navigate("/login")} // 🔑 allow switch to login
+            />
+          }
         />
 
         {/* Protected Post Job with redirect */}

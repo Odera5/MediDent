@@ -6,6 +6,7 @@ import {
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
@@ -17,6 +18,7 @@ export function LoginModal({
   onClose,
   onLoginSuccess,
   onSuccessRedirect,
+  onOpenSignup, // 🔑 passed from App.jsx to open SignupModal
 }) {
   const [formData, setFormData] = useState({
     email: "",
@@ -24,21 +26,19 @@ export function LoginModal({
     rememberMe: false,
   });
 
+  const [isResetting, setIsResetting] = useState(false); // loading state for reset
   const location = useLocation();
-  const redirectPath = location.state?.from || "/"; // default to home if no redirect target
+  const redirectPath = location.state?.from || "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      // Set persistence based on "remember me"
       const persistence = formData.rememberMe
         ? browserLocalPersistence
         : browserSessionPersistence;
 
       await setPersistence(auth, persistence);
 
-      // Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(
         auth,
         formData.email,
@@ -46,27 +46,14 @@ export function LoginModal({
       );
       const user = userCredential.user;
 
-      // Fetch profile from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
-
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        console.log("User role:", userData.role);
-
         toast.success(`Welcome back, ${userData.fullName || "User"}!`);
-
         onClose();
-
-        if (onLoginSuccess) {
-          onLoginSuccess(user);
-        }
-
-        // Redirect user back to where they wanted to go
-        if (onSuccessRedirect) {
-          onSuccessRedirect(redirectPath);
-        }
+        if (onLoginSuccess) onLoginSuccess(user);
+        if (onSuccessRedirect) onSuccessRedirect(redirectPath);
       } else {
-        console.warn("No profile found for this user in Firestore.");
         toast.error("Profile not found. Please contact support.");
         await signOut(auth);
       }
@@ -76,11 +63,29 @@ export function LoginModal({
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast.error("Please enter your email first.");
+      return;
+    }
+    try {
+      setIsResetting(true);
+      await sendPasswordResetEmail(auth, formData.email);
+      toast.success("Password reset email sent! Please check your inbox.");
+    } catch (error) {
+      console.error("Password reset failed:", error.message);
+      toast.error(error.message);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white p-8 rounded-xl w-full max-w-md relative animate-in slide-in-from-bottom-4 duration-300">
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-blue-900 text-2xl font-semibold">
             Login to Your Account
@@ -93,7 +98,9 @@ export function LoginModal({
           </button>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit}>
+          {/* Email */}
           <div className="mb-6">
             <label className="block text-blue-900 font-medium mb-2">
               Email Address
@@ -110,6 +117,7 @@ export function LoginModal({
             />
           </div>
 
+          {/* Password */}
           <div className="mb-6">
             <label className="block text-blue-900 font-medium mb-2">
               Password
@@ -126,6 +134,7 @@ export function LoginModal({
             />
           </div>
 
+          {/* Remember Me */}
           <div className="mb-6">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -140,6 +149,7 @@ export function LoginModal({
             </label>
           </div>
 
+          {/* Login Button */}
           <button
             type="submit"
             className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all"
@@ -147,13 +157,30 @@ export function LoginModal({
             Login
           </button>
 
-          <div className="text-center mt-4">
-            <a
-              href="#"
-              className="text-teal-500 hover:text-teal-600 transition-colors"
+          {/* Forgot password + Signup */}
+          <div className="text-center mt-4 space-y-2">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={isResetting}
+              className="text-teal-500 hover:text-teal-600 transition-colors disabled:opacity-50"
             >
-              Forgot password?
-            </a>
+              {isResetting ? "Sending reset link..." : "Forgot password?"}
+            </button>
+
+            <p className="text-gray-600">
+              Not a member?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onOpenSignup) onOpenSignup();
+                }}
+                className="text-teal-500 hover:text-teal-600 font-medium"
+              >
+                Sign up here
+              </button>
+            </p>
           </div>
         </form>
       </div>

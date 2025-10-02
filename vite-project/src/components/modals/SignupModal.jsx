@@ -5,7 +5,7 @@ import { auth, db } from "../../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
-export function SignupModal({ isOpen, onClose }) {
+export function SignupModal({ isOpen, onClose, onOpenLogin }) {
   const [activeTab, setActiveTab] = useState("jobseeker");
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,6 @@ export function SignupModal({ isOpen, onClose }) {
       );
       const user = userCredential.user;
 
-      // Firestore profile
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         fullName: jobseekerData.fullName,
@@ -71,7 +70,6 @@ export function SignupModal({ isOpen, onClose }) {
       );
       const user = userCredential.user;
 
-      // Firestore profile
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         contactName: employerData.contactName,
@@ -213,6 +211,21 @@ export function SignupModal({ isOpen, onClose }) {
             >
               {loading ? "Creating..." : "Create Job Seeker Account"}
             </button>
+
+            {/* Already have an account */}
+            <p className="text-center text-gray-600 mt-4">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onOpenLogin) onOpenLogin();
+                }}
+                className="text-teal-500 hover:text-teal-600 font-medium"
+              >
+                Log in here
+              </button>
+            </p>
           </form>
         )}
 
@@ -300,6 +313,21 @@ export function SignupModal({ isOpen, onClose }) {
             >
               {loading ? "Creating..." : "Create Employer Account"}
             </button>
+
+            {/* Already have an account */}
+            <p className="text-center text-gray-600 mt-4">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onOpenLogin) onOpenLogin();
+                }}
+                className="text-teal-500 hover:text-teal-600 font-medium"
+              >
+                Log in here
+              </button>
+            </p>
           </form>
         )}
       </div>
