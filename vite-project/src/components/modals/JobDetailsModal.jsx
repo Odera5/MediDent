@@ -1,7 +1,7 @@
 import React from "react";
 import { X, MapPin, Briefcase, Clock } from "lucide-react";
 
-export function JobDetailsModal({ job, isOpen, onClose }) {
+export function JobDetailsModal({ job, isOpen, onClose, onApply }) {
   if (!isOpen || !job) return null;
 
   return (
@@ -20,7 +20,6 @@ export function JobDetailsModal({ job, isOpen, onClose }) {
           </button>
         </div>
 
-        
         <p className="text-gray-600 font-medium mb-4">{job.hospital}</p>
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-700 flex items-center gap-2">
@@ -58,7 +57,10 @@ export function JobDetailsModal({ job, isOpen, onClose }) {
         </div>
 
         {/* Action */}
-        <button className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all">
+        <button
+          onClick={() => onApply(job.id)}
+          className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all"
+        >
           Apply Now
         </button>
       </div>

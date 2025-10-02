@@ -37,14 +37,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Home({ onApply }) {
-  const {
-    jobs,
-
-    loadMoreJobs,
-
-    showLoadMore,
-  } = useJobs();
-
+  const { jobs, loadMoreJobs, showLoadMore } = useJobs();
   const navigate = useNavigate();
 
   return (
@@ -54,7 +47,6 @@ function Home({ onApply }) {
         onPostJobClick={() => navigate("/post-job")}
       />
 
-      {/* Added id="jobs" here */}
       <main
         id="jobs"
         className="max-w-6xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-4 gap-8"
@@ -111,6 +103,7 @@ function ApplyWrapper({ onClose }) {
 
 function App() {
   const navigate = useNavigate();
+
   const [currentUser, loadingUser] = useAuthState(auth);
 
   if (loadingUser) return <p className="p-8 text-center">Loading user...</p>;
@@ -130,22 +123,43 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home onApply={handleApply} />} />
+
+        {/* Login with redirect support */}
         <Route
           path="/login"
-          element={<LoginModal isOpen={true} onClose={() => navigate("/")} />}
+          element={
+            <LoginModal
+              isOpen={true}
+              onClose={() => navigate("/")}
+              onSuccessRedirect={(redirectPath) =>
+                navigate(redirectPath || "/")
+              }
+            />
+          }
         />
+
         <Route
           path="/signup"
           element={<SignupModal isOpen={true} onClose={() => navigate("/")} />}
         />
+
+        {/* Protected Post Job with redirect */}
         <Route
           path="/post-job"
-          element={<PostJobModal isOpen={true} onClose={() => navigate("/")} />}
+          element={
+            currentUser ? (
+              <PostJobModal isOpen={true} onClose={() => navigate("/")} />
+            ) : (
+              <Navigate to="/login" state={{ from: "/post-job" }} />
+            )
+          }
         />
+
         <Route
           path="/apply/:jobId"
           element={<ApplyWrapper onClose={() => navigate("/")} />}
         />
+
         <Route
           path="/jobs"
           element={<h2 className="p-8 text-xl">Jobs Page Coming Soon...</h2>}
@@ -159,41 +173,39 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Protected Dashboard Route */}
+        {/* Protected Dashboard */}
         <Route
           path="/dashboard/*"
           element={
             currentUser ? (
               <Dashboard currentUser={currentUser} />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: "/dashboard" }} />
             )
           }
         />
 
-
-
-
-        <Route path="/jobs" element={<PlaceholderPage />} />
-          <Route path="/profile/create" element={<PlaceholderPage />} />
-          <Route path="/resources/career" element={<PlaceholderPage />} />
-          <Route path="/resume-builder" element={<PlaceholderPage />} />
-          <Route path="/resources/interview-tips" element={<PlaceholderPage />} />
-          <Route path="/employers/post-job" element={<PlaceholderPage />} />
-          <Route path="/employers/search" element={<PlaceholderPage />} />
-          <Route path="/pricing" element={<PlaceholderPage />} />
-          <Route path="/employers/services" element={<PlaceholderPage />} />
-          <Route path="/employers/dashboard" element={<PlaceholderPage />} />
-          <Route path="/resources/salary-guide" element={<PlaceholderPage />} />
-          <Route path="/resources/industry-reports" element={<PlaceholderPage />} />
-          <Route path="/news" element={<PlaceholderPage />} />
-          <Route path="/blog" element={<PlaceholderPage />} />
-          <Route path="/faq" element={<PlaceholderPage />} />
-          <Route path="/about" element={<PlaceholderPage />} />
-          <Route path="/help" element={<PlaceholderPage />} />
-          <Route path="/contact" element={<PlaceholderPage />} />
-          <Route path="/privacy" element={<PlaceholderPage />} />
-          <Route path="/terms" element={<PlaceholderPage />} />
+        {/* Placeholder routes */}
+        <Route path="/profile/create" element={<PlaceholderPage />} />
+        <Route path="/resources/career" element={<PlaceholderPage />} />
+        <Route path="/resume-builder" element={<PlaceholderPage />} />
+        <Route path="/resources/interview-tips" element={<PlaceholderPage />} />
+        <Route path="/employers/post-job" element={<PlaceholderPage />} />
+        <Route path="/employers/search" element={<PlaceholderPage />} />
+        <Route path="/pricing" element={<PlaceholderPage />} />
+        <Route path="/employers/services" element={<PlaceholderPage />} />
+        <Route path="/employers/dashboard" element={<PlaceholderPage />} />
+        <Route path="/resources/salary-guide" element={<PlaceholderPage />} />
+        <Route
+          path="/resources/industry-reports"
+          element={<PlaceholderPage />}
+        />
+        <Route path="/news" element={<PlaceholderPage />} />
+        <Route path="/blog" element={<PlaceholderPage />} />
+        <Route path="/faq" element={<PlaceholderPage />} />
+        <Route path="/help" element={<PlaceholderPage />} />
+        <Route path="/privacy" element={<PlaceholderPage />} />
+        <Route path="/terms" element={<PlaceholderPage />} />
       </Routes>
 
       <Footer />
