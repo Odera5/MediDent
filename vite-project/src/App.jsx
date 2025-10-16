@@ -22,13 +22,13 @@ import { ApplyModal } from "./components/modals/ApplyModal";
 import { PostJobModal } from "./components/modals/PostJobModal";
 import { useJobs } from "./hooks/useJobs";
 import { Contact } from "./components/pages/Contact";
-import { About } from "./components/pages/About";
+import {About}  from "./components/pages/About";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { PlaceholderPage } from "./components/pages/PlaceholderPage";
 
 // Firebase
 import { db, storage, auth } from "./firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -66,15 +66,22 @@ function Home({ onApply }) {
   );
 }
 
-// Apply wrapper ensures jobId and jobTitle are passed correctly
+// Apply wrapper: ensures jobId, jobTitle, and companyName are stored correctly
 function ApplyWrapper({ onClose }) {
   const { jobId } = useParams();
   const location = useLocation();
-  const jobTitle = location.state?.jobTitle || "Position";
+  const { jobTitle, companyName } = location.state || {
+    jobTitle: "Position",
+    companyName: "Unknown Hospital",
+  };
 
-  const handleSubmit = async (cvFile) => {
-    if (!cvFile) throw new Error("No file selected");
+  const [currentUser] = useAuthState(auth);
 
+  const handleSubmit = async (cvFile, coverLetter) => {
+    if (!currentUser) throw new Error("You must be logged in to apply.");
+    if (!cvFile) throw new Error("No file selected.");
+
+    // Upload resume
     const storageRef = ref(
       storage,
       `resumes/${jobId}/${Date.now()}_${cvFile.name}`
@@ -82,11 +89,17 @@ function ApplyWrapper({ onClose }) {
     await uploadBytes(storageRef, cvFile);
     const downloadURL = await getDownloadURL(storageRef);
 
+    // Save application data
     const applicationsCollection = collection(db, "applications");
     await addDoc(applicationsCollection, {
+      userId: currentUser.uid,
       jobId,
+      jobTitle,
+      companyName,
+      coverLetter,
       resumeURL: downloadURL,
       submittedAt: new Date(),
+      status: "Pending",
     });
   };
 
@@ -96,6 +109,7 @@ function ApplyWrapper({ onClose }) {
       onClose={onClose}
       jobId={jobId}
       jobTitle={jobTitle}
+      companyName={companyName}
       onSubmit={handleSubmit}
     />
   );
@@ -103,15 +117,13 @@ function ApplyWrapper({ onClose }) {
 
 function App() {
   const navigate = useNavigate();
-  const location = useLocation();
-
   const [currentUser, loadingUser] = useAuthState(auth);
 
   if (loadingUser) return <p className="p-8 text-center">Loading user...</p>;
 
-  // Pass both jobId and jobTitle when navigating
-  const handleApply = (jobId, jobTitle) => {
-    navigate(`/apply/${jobId}`, { state: { jobTitle } });
+  //  Pass jobId, jobTitle, and companyName when applying
+  const handleApply = (jobId, jobTitle, companyName) => {
+    navigate(`/apply/${jobId}`, { state: { jobTitle, companyName } });
   };
 
   return (
@@ -125,7 +137,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home onApply={handleApply} />} />
 
-        {/* Login with redirect support */}
+        {/* Auth routes */}
         <Route
           path="/login"
           element={
@@ -135,24 +147,22 @@ function App() {
               onSuccessRedirect={(redirectPath) =>
                 navigate(redirectPath || "/")
               }
-              onOpenSignup={() => navigate("/signup")} // 🔑 allow switch to signup
+              onOpenSignup={() => navigate("/signup")}
             />
           }
         />
-
-        {/* Signup with redirect support */}
         <Route
           path="/signup"
           element={
             <SignupModal
               isOpen={true}
               onClose={() => navigate("/")}
-              onOpenLogin={() => navigate("/login")} // 🔑 allow switch to login
+              onOpenLogin={() => navigate("/login")}
             />
           }
         />
 
-        {/* Protected Post Job with redirect */}
+        {/* Protected Post Job */}
         <Route
           path="/post-job"
           element={
@@ -164,25 +174,13 @@ function App() {
           }
         />
 
+        {/* Apply route */}
         <Route
           path="/apply/:jobId"
           element={<ApplyWrapper onClose={() => navigate("/")} />}
         />
 
-        <Route
-          path="/jobs"
-          element={<h2 className="p-8 text-xl">Jobs Page Coming Soon...</h2>}
-        />
-        <Route
-          path="/hospitals"
-          element={
-            <h2 className="p-8 text-xl">Hospitals Page Coming Soon...</h2>
-          }
-        />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-
-        {/* Protected Dashboard */}
+        {/* Dashboard */}
         <Route
           path="/dashboard/*"
           element={
@@ -193,6 +191,10 @@ function App() {
             )
           }
         />
+
+        {/* Pages */}
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
 
         {/* Placeholder routes */}
         <Route path="/profile/create" element={<PlaceholderPage />} />

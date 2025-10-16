@@ -18,7 +18,7 @@ export function LoginModal({
   onClose,
   onLoginSuccess,
   onSuccessRedirect,
-  onOpenSignup, // 🔑 passed from App.jsx to open SignupModal
+  onOpenSignup, // passed from App.jsx to open SignupModal
 }) {
   const [formData, setFormData] = useState({
     email: "",

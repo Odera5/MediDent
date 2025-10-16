@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { db } from "../../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -51,10 +52,58 @@ export default function AdminDashboard() {
     fetchMessages();
   }, []);
 
+  // Skeleton loader component
+  const SkeletonTable = () => (
+    <div className="overflow-x-auto animate-pulse">
+      <table className="w-full border border-gray-200 rounded-lg text-left">
+        <thead className="bg-blue-100">
+          <tr>
+            <th className="px-4 py-2 border-b w-1/3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </th>
+            <th className="px-4 py-2 border-b w-1/3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </th>
+            <th className="px-4 py-2 border-b w-1/3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array(5)
+            .fill()
+            .map((_, idx) => (
+              <tr key={idx} className="border-b border-gray-100">
+                <td className="px-4 py-3">
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
-    <div className="max-w-6xl mx-auto p-8 flex flex-col md:flex-row gap-8">
+    <motion.div
+      className="max-w-6xl mx-auto p-8 flex flex-col md:flex-row gap-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
       {/* Sidebar */}
-      <aside className="w-full md:w-1/4 sticky top-24 h-fit bg-white p-4 shadow rounded-lg">
+      <motion.aside
+        className="w-full md:w-1/4 sticky top-24 h-fit bg-white p-4 shadow rounded-lg"
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <h2 className="text-xl font-semibold mb-4 text-blue-900">Admin Menu</h2>
         <ul className="space-y-2">
           <li>
@@ -74,10 +123,15 @@ export default function AdminDashboard() {
             </button>
           </li>
         </ul>
-      </aside>
+      </motion.aside>
 
       {/* Main Content */}
-      <main className="w-full md:w-3/4 flex flex-col gap-12">
+      <motion.main
+        className="w-full md:w-3/4 flex flex-col gap-12"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <h1 className="text-4xl font-bold mb-6 text-blue-900">
           Admin Dashboard
         </h1>
@@ -86,7 +140,7 @@ export default function AdminDashboard() {
         <section ref={usersRef}>
           <h2 className="text-2xl font-semibold mb-4">Registered Users</h2>
           {loadingUsers ? (
-            <p>Loading users...</p>
+            <SkeletonTable />
           ) : users.length === 0 ? (
             <p>No users found.</p>
           ) : (
@@ -119,7 +173,7 @@ export default function AdminDashboard() {
         <section ref={messagesRef}>
           <h2 className="text-2xl font-semibold mb-4">Contact Messages</h2>
           {loadingMessages ? (
-            <p>Loading messages...</p>
+            <SkeletonTable />
           ) : messages.length === 0 ? (
             <p>No messages found.</p>
           ) : (
@@ -151,7 +205,7 @@ export default function AdminDashboard() {
             </div>
           )}
         </section>
-      </main>
-    </div>
+      </motion.main>
+    </motion.div>
   );
 }

@@ -25,25 +25,20 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
       <div className="mb-8">
         <div className="text-blue-900 font-semibold mb-4 text-lg">Job Type</div>
         <div className="space-y-3">
-          {[
-            { value: "full-time", label: "Full-time" },
-            { value: "part-time", label: "Part-time" },
-            { value: "contract", label: "Contract" },
-            { value: "locum", label: "Locum" },
-          ].map(({ value, label }) => (
+          {["Full-time", "Part-time", "Contract", "Locum"].map((type) => (
             <label
-              key={value}
+              key={type}
               className="flex items-center gap-3 cursor-pointer hover:text-blue-900 transition-colors"
             >
               <input
                 type="checkbox"
-                checked={filters.jobTypes?.includes(value) || false}
+                checked={filters.jobTypes?.includes(type) || false}
                 onChange={(e) =>
-                  updateArrayFilter("jobTypes", value, e.target.checked)
+                  updateArrayFilter("jobTypes", type, e.target.checked)
                 }
                 className="w-5 h-5 accent-teal-500"
               />
-              {label}
+              {type}
             </label>
           ))}
         </div>
@@ -56,24 +51,24 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
         </div>
         <div className="space-y-3">
           {[
-            { value: "entry", label: "Entry Level (0-2 years)" },
-            { value: "mid", label: "Mid-Level (3-5 years)" },
-            { value: "senior", label: "Senior Level (6-10 years)" },
-            { value: "consultant", label: "Consultant (10+ years)" },
-          ].map(({ value, label }) => (
+            "Entry Level (0-2 years)",
+            "Mid-Level (3-5 years)",
+            "Senior Level (6-10 years)",
+            "Consultant (10+ years)",
+          ].map((level) => (
             <label
-              key={value}
+              key={level}
               className="flex items-center gap-3 cursor-pointer hover:text-blue-900 transition-colors"
             >
               <input
                 type="checkbox"
-                checked={filters.experienceLevels?.includes(value) || false}
+                checked={filters.experienceLevels?.includes(level) || false}
                 onChange={(e) =>
-                  updateArrayFilter("experienceLevels", value, e.target.checked)
+                  updateArrayFilter("experienceLevels", level, e.target.checked)
                 }
                 className="w-5 h-5 accent-teal-500"
               />
-              {label}
+              {level}
             </label>
           ))}
         </div>
@@ -82,15 +77,15 @@ export function Sidebar({ filters, onFiltersChange, onClearFilters }) {
       {/* Salary Range */}
       <div className="mb-8">
         <div className="text-blue-900 font-semibold mb-4 text-lg">
-          Salary Range
+          Salary Range (₦)
         </div>
         <div className="space-y-3">
           {[
-            { value: "2-5", label: "₦2M - ₦5M" },
-            { value: "5-8", label: "₦5M - ₦8M" },
-            { value: "8-12", label: "₦8M - ₦12M" },
-            { value: "12+", label: "₦12M+" },
-          ].map(({ value, label }) => (
+            { label: "₦2M - ₦5M", value: "2000000-5000000" },
+            { label: "₦5M - ₦8M", value: "5000000-8000000" },
+            { label: "₦8M - ₦12M", value: "8000000-12000000" },
+            { label: "₦12M+", value: "12000000-99999999" },
+          ].map(({ label, value }) => (
             <label
               key={value}
               className="flex items-center gap-3 cursor-pointer hover:text-blue-900 transition-colors"

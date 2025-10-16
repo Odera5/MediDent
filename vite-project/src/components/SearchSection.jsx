@@ -21,7 +21,6 @@ export function SearchSection({ filters, onFiltersChange, onSearch }) {
     <section className="bg-gray-50 py-8 border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-8">
         <div className="bg-white p-8 rounded-xl shadow-md">
-          {/* Flex container instead of grid */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             
             {/* Job Title / Keywords */}

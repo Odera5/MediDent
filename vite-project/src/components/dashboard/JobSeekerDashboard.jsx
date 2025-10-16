@@ -1,152 +1,98 @@
-import React, { useRef, useEffect, useState } from "react";
-import { db } from "../../firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { toast } from "react-toastify";
+import React from "react";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function JobSeekerDashboard({ currentUser }) {
-  const savedJobsRef = useRef(null);
-  const appliedJobsRef = useRef(null);
+export default function JobSeekerDashboard() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [savedJobs, setSavedJobs] = useState([]);
-  const [appliedJobs, setAppliedJobs] = useState([]);
-  const [loadingSaved, setLoadingSaved] = useState(true);
-  const [loadingApplied, setLoadingApplied] = useState(true);
-
-  const scrollToSection = (ref) => {
-    ref.current.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    const fetchSavedJobs = async () => {
-      try {
-        const savedJobsQuery = query(
-          collection(db, "savedJobs"),
-          where("userId", "==", currentUser.uid)
-        );
-        const snapshot = await getDocs(savedJobsQuery);
-        const jobs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setSavedJobs(jobs);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch saved jobs");
-      } finally {
-        setLoadingSaved(false);
-      }
-    };
-
-    const fetchAppliedJobs = async () => {
-      try {
-        const appliedJobsQuery = query(
-          collection(db, "applications"),
-          where("userId", "==", currentUser.uid)
-        );
-        const snapshot = await getDocs(appliedJobsQuery);
-        const jobs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setAppliedJobs(jobs);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch applied jobs");
-      } finally {
-        setLoadingApplied(false);
-      }
-    };
-
-    fetchSavedJobs();
-    fetchAppliedJobs();
-  }, [currentUser]);
+  const sidebarItems = [
+    { path: "/dashboard/jobseeker/saved", label: "Saved Jobs" },
+    { path: "/dashboard/jobseeker/applications", label: "Applied Jobs" },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto p-8 flex flex-col md:flex-row gap-8">
-      {/* Sidebar */}
-      <aside className="w-full md:w-1/4 sticky top-24 h-fit bg-white p-4 shadow rounded-lg">
+      {/* Sidebar (slides in when scrolled into view) */}
+      <motion.aside
+        className="w-full md:w-1/4 sticky top-24 h-fit bg-white p-4 shadow rounded-lg"
+        initial={{ opacity: 0, x: -60 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <h2 className="text-xl font-semibold mb-4 text-blue-900">
           Job Seeker Menu
         </h2>
+
         <ul className="space-y-2">
-          <li>
-            <button
-              className="text-teal-500 hover:underline font-medium"
-              onClick={() => scrollToSection(savedJobsRef)}
-            >
-              Saved Jobs
-            </button>
-          </li>
-          <li>
-            <button
-              className="text-teal-500 hover:underline font-medium"
-              onClick={() => scrollToSection(appliedJobsRef)}
-            >
-              Applied Jobs
-            </button>
-          </li>
+          {sidebarItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <motion.li
+                key={item.path}
+                whileHover={{ x: 5 }}
+                className={`relative ${
+                  isActive ? "text-blue-900 font-semibold" : "text-teal-500"
+                }`}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="activeIndicator"
+                    className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-900 rounded"
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+
+                <button
+                  className={`hover:underline ${
+                    isActive ? "text-blue-900" : "text-teal-500"
+                  }`}
+                  onClick={() => navigate(item.path)}
+                >
+                  {item.label}
+                </button>
+              </motion.li>
+            );
+          })}
         </ul>
-      </aside>
+      </motion.aside>
 
-      {/* Main Content */}
-      <main className="w-full md:w-3/4 flex flex-col gap-12">
-        <h1 className="text-4xl font-bold mb-6 text-blue-900">
-          Job Seeker Dashboard
-        </h1>
+      {/* Main Content (fades in on scroll) */}
+      <motion.main
+        className="w-full md:w-3/4 flex flex-col gap-12"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        {/* Animated title */}
+        <AnimatePresence mode="wait">
+          <motion.h1
+            key={location.pathname.split("/").pop()}
+            className="text-4xl font-bold mb-6 text-blue-900"
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            transition={{ duration: 0.5 }}
+          >
+            Job Seeker Dashboard
+          </motion.h1>
+        </AnimatePresence>
 
-        {/* Saved Jobs Section */}
-        <section ref={savedJobsRef} className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Saved Jobs</h2>
-          <div className="p-6 bg-white shadow rounded-lg border border-gray-200">
-            {loadingSaved ? (
-              <p>Loading saved jobs...</p>
-            ) : savedJobs.length === 0 ? (
-              <p>No saved jobs found.</p>
-            ) : (
-              <ul className="space-y-2">
-                {savedJobs.map((job) => (
-                  <li
-                    key={job.id}
-                    className="p-3 border-b hover:bg-gray-50 rounded"
-                  >
-                    <p className="font-semibold">{job.title}</p>
-                    <p className="text-gray-600">{job.company}</p>
-                    <p className="text-sm text-gray-500">{job.location}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-
-        {/* Applied Jobs Section */}
-        <section ref={appliedJobsRef}>
-          <h2 className="text-2xl font-semibold mb-4">Applied Jobs</h2>
-          <div className="p-6 bg-white shadow rounded-lg border border-gray-200">
-            {loadingApplied ? (
-              <p>Loading applied jobs...</p>
-            ) : appliedJobs.length === 0 ? (
-              <p>No applied jobs found.</p>
-            ) : (
-              <ul className="space-y-2">
-                {appliedJobs.map((job) => (
-                  <li
-                    key={job.id}
-                    className="p-3 border-b hover:bg-gray-50 rounded"
-                  >
-                    <p className="font-semibold">{job.jobTitle}</p>
-                    <p className="text-gray-600">
-                      Applied on:{" "}
-                      {job.submittedAt?.toDate?.().toLocaleDateString() ||
-                        "N/A"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-      </main>
+        {/* Nested route animation */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
+      </motion.main>
     </div>
   );
 }
