@@ -1,22 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart, Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig.js";
+import { motion } from "framer-motion";
 
 export function Header({ onLoginClick, onSignupClick, currentUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  // Detect scroll for header animation
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      window.location.href = "/"; // redirect after logout
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -42,40 +51,41 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
     <header className="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-8">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <div className="flex items-center text-3xl font-bold cursor-pointer">
-            <div className="w-8 h-8 bg-teal-500 rounded-full mr-2 flex items-center justify-center">
+          {/* Logo with scroll animation */}
+          <motion.div
+            className="flex items-center text-3xl font-bold cursor-pointer"
+            animate={{
+              scale: isScrolled ? 1.05 : 1,
+              color: isScrolled ? "#14B8A6" : "#ffffff",
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <motion.div
+              className="w-8 h-8 bg-teal-500 rounded-full mr-2 flex items-center justify-center"
+              animate={{
+                scale: isScrolled ? 1.1 : 1,
+                rotate: isScrolled ? 15 : 0,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
               <Heart className="w-5 h-5" />
-            </div>
+            </motion.div>
             LumiaGlobe Jobs
-          </div>
+          </motion.div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className={linkClasses("/")}>
-              Home
-            </Link>
-            <button
-              onClick={handleFindJobsClick}
-              className={linkClasses("/jobs")}
-            >
+            <Link to="/" className={linkClasses("/")}>Home</Link>
+            <button onClick={handleFindJobsClick} className={linkClasses("/jobs")}>
               Find Jobs
             </button>
-            <Link to="/post-job" className={linkClasses("/hospitals")}>
-              For Hospitals
-            </Link>
-            <Link to="/about" className={linkClasses("/about")}>
-              About
-            </Link>
-            <Link to="/contact" className={linkClasses("/contact")}>
-              Contact
-            </Link>
+            <Link to="/post-job" className={linkClasses("/hospitals")}>For Hospitals</Link>
+            <Link to="/about" className={linkClasses("/about")}>About</Link>
+            <Link to="/contact" className={linkClasses("/contact")}>Contact</Link>
 
             {currentUser && (
               <>
-                <Link to="/dashboard" className={linkClasses("/dashboard")}>
-                  Dashboard
-                </Link>
+                <Link to="/dashboard" className={linkClasses("/dashboard")}>Dashboard</Link>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 border-2 border-white text-white hover:bg-white hover:text-blue-900 rounded-lg font-medium transition-all"
@@ -105,80 +115,98 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
           )}
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-white text-2xl"
-            onClick={toggleMobileMenu}
-          >
+          <button className="md:hidden text-white text-2xl" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
 
-        {/* Mobile Nav */}
+        {/* Mobile Nav with animation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/20 py-4">
-            <div className="flex flex-col space-y-4 mb-4">
-              <Link
-                to="/"
-                className={linkClasses("/")}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <button
-                onClick={() => {
-                  handleFindJobsClick();
-                  setIsMobileMenuOpen(false);
-                }}
-                className={linkClasses("/jobs")}
-              >
-                Find Jobs
-              </button>
-              <Link
-                to="/post-job"
-                className={linkClasses("/hospitals")}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                For Hospitals
-              </Link>
-              <Link
-                to="/about"
-                className={linkClasses("/about")}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link
-                to="/contact"
-                className={linkClasses("/contact")}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Contact
-              </Link>
+          <motion.div
+            className="md:hidden border-t border-white/20 py-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="flex flex-col space-y-4 mb-4"
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+            >
+              {[
+                { label: "Home", to: "/" },
+                { label: "Find Jobs", to: "/jobs", onClick: handleFindJobsClick },
+                { label: "For Hospitals", to: "/post-job" },
+                { label: "About", to: "/about" },
+                { label: "Contact", to: "/contact" },
+              ].map((item) => (
+                <motion.div
+                  key={item.label}
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    show: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+                  }}
+                >
+                  {item.onClick ? (
+                    <button
+                      onClick={() => {
+                        item.onClick();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={linkClasses(item.to)}
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.to}
+                      className={linkClasses(item.to)}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </motion.div>
+              ))}
 
               {currentUser && (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className={linkClasses("/dashboard")}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <motion.div
+                    variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
                   >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="px-4 py-2 border border-white text-white hover:bg-white hover:text-blue-900 rounded-lg transition-all"
+                    <Link
+                      to="/dashboard"
+                      className={linkClasses("/dashboard")}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </motion.div>
+                  <motion.div
+                    variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
                   >
-                    Logout
-                  </button>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="px-4 py-2 border border-white text-white hover:bg-white hover:text-blue-900 rounded-lg transition-all"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
                 </>
               )}
-            </div>
+            </motion.div>
 
             {!currentUser && (
-              <div className="flex space-x-2">
+              <motion.div
+                className="flex space-x-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
                 <button
                   onClick={() => {
                     onLoginClick();
@@ -197,9 +225,9 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
                 >
                   Sign Up
                 </button>
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </header>

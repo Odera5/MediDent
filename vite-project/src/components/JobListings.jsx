@@ -19,6 +19,7 @@ export function JobListings({ onApply }) {
     salaryRanges: [],
   });
 
+  // Fetch jobs in real-time
   useEffect(() => {
     const q = query(collection(db, "jobs"), orderBy("postedAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -93,9 +94,7 @@ export function JobListings({ onApply }) {
   const containerVariants = {
     hidden: {},
     show: {
-      transition: {
-        staggerChildren: 0.15, // delay between each job card animation
-      },
+      transition: { staggerChildren: 0.15 },
     },
   };
 
@@ -106,11 +105,10 @@ export function JobListings({ onApply }) {
 
   return (
     <section className="bg-white flex flex-col gap-6">
-      {/* 🔹 Animated Search Section */}
+      {/* 🔹 Search Section */}
       <motion.div
         initial={{ opacity: 0, y: -40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <SearchSection
@@ -120,64 +118,59 @@ export function JobListings({ onApply }) {
         />
       </motion.div>
 
-      {/* 🔹 Job Listings */}
-      <div className="flex-1">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex justify-between items-center mb-8 mt-6"
-        >
-          <h2 className="text-blue-900 text-3xl font-semibold">
-            Latest Job Opportunities
-          </h2>
-          <span className="text-gray-600">
-            Showing {filteredJobs.length} jobs
-          </span>
-        </motion.div>
+      {/* 🔹 Job Listings Header */}
+      <motion.div
+        className="flex justify-between items-center mb-8 mt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <h2 className="text-blue-900 text-3xl font-semibold">
+          Latest Job Opportunities
+        </h2>
+        <span className="text-gray-600">Showing {filteredJobs.length} jobs</span>
+      </motion.div>
 
-        {/* 🔹 Staggered Animation for Job Cards */}
-        <motion.div
-          className="space-y-6"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {loading ? (
-            <p>Loading jobs...</p>
-          ) : filteredJobs.length > 0 ? (
-            filteredJobs.map((job) => (
-              <motion.div
-                key={job.id}
-                variants={cardVariants}
-                whileHover={{
-                  scale: 1.02,
-                  y: -3,
-                  boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
-                }}
-              >
-                <JobCard
-                  job={job}
-                  onApply={() =>
-                    onApply(job.id, job.title, job.hospitalName || "Unknown")
-                  }
-                />
-              </motion.div>
-            ))
-          ) : (
-            <p>No jobs found.</p>
-          )}
-        </motion.div>
-      </div>
+      {/* 🔹 Job Cards Container */}
+      <motion.div
+        className="space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show" // animate all cards immediately on desktop
+      >
+        {loading ? (
+          <p>Loading jobs...</p>
+        ) : filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
+            <motion.div
+              key={job.id}
+              variants={cardVariants}
+              whileHover={{
+                scale: 1.02,
+                y: -3,
+                boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+              }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }} // fixes scroll-up issue
+            >
+              <JobCard
+                job={job}
+                onApply={() =>
+                  onApply(job.id, job.title, job.hospitalName || "Unknown")
+                }
+              />
+            </motion.div>
+          ))
+        ) : (
+          <p>No jobs found.</p>
+        )}
+      </motion.div>
 
-      {/* 🔹 Animated Sidebar */}
+      {/* 🔹 Sidebar */}
       <motion.div
         className="w-full"
         initial={{ opacity: 0, x: 80 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <Sidebar
