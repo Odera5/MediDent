@@ -1,24 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { db } from "../../firebaseConfig";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
 export default function Blog() {
-  const posts = [
-    {
-      title: "5 Tips for Healthcare Career Growth",
-      summary:
-        "Learn practical strategies to advance your career in healthcare, from networking to certifications.",
-    },
-    {
-      title: "Maintaining Mental Health as a Healthcare Worker",
-      summary:
-        "Explore ways to balance work stress and personal life for long-term professional wellbeing.",
-    },
-    {
-      title: "Top Skills Employers Look For in Nurses",
-      summary:
-        "Discover the key skills that healthcare employers value most when hiring nurses and medical staff.",
-    },
-  ];
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const q = query(collection(db, "blogPosts"), orderBy("date", "desc"));
+        const snapshot = await getDocs(q);
+        const fetchedPosts = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-16 px-6 sm:px-10">
@@ -31,22 +39,51 @@ export default function Blog() {
         Blog
       </motion.h1>
 
-      <div className="max-w-6xl mx-auto grid gap-6">
-        {posts.map((post, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.15 }}
-            className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-800 mb-2">
-              {post.title}
-            </h3>
-            <p className="text-gray-700">{post.summary}</p>
-          </motion.div>
-        ))}
-      </div>
+      {loading ? (
+        <p className="text-center text-blue-700 font-medium animate-pulse">
+          Loading blog posts...
+        </p>
+      ) : posts.length > 0 ? (
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post, index) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition"
+            >
+              {post.imageUrl && (
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className="w-full h-48 object-cover rounded-xl mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                {post.title}
+              </h3>
+              <p className="text-gray-700 mb-3">{post.summary}</p>
+              <p className="text-sm text-gray-500 mb-4">
+                {post.date
+                  ? new Date(post.date.seconds * 1000).toLocaleDateString(
+                      "en-NG",
+                      { dateStyle: "medium" }
+                    )
+                  : ""}
+              </p>
+              <Link
+                to={`/blog/${post.id}`}
+                className="text-blue-700 font-medium hover:underline"
+              >
+                Read More →
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-gray-600">No blog posts available yet.</p>
+      )}
     </div>
   );
 }

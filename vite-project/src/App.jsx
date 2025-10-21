@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -22,7 +22,7 @@ import { ApplyModal } from "./components/modals/ApplyModal";
 import { PostJobModal } from "./components/modals/PostJobModal";
 import { useJobs } from "./hooks/useJobs";
 import { Contact } from "./components/pages/Contact";
-import {About}  from "./components/pages/About";
+import { About } from "./components/pages/About";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { PlaceholderPage } from "./components/pages/PlaceholderPage";
 import ProfileBuilder from "./components/footercomponent/ProfileBuilder";
@@ -37,12 +37,11 @@ import Blog from "./components/pages/Blog";
 import FAQ from "./components/pages/FAQ";
 import PrivacyPolicy from "./components/pages/PrivacyPolicy";
 import TermsOfService from "./components/pages/TermsOfService";
-
-
+import BlogPost from "./components/pages/BlogPost";
 
 // Firebase
 import { db, storage, auth } from "./firebaseConfig";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -50,6 +49,16 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+/* --- ScrollToTop Component --- */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [pathname]);
+  return null;
+}
+
+/* --- Home Component --- */
 function Home({ onApply }) {
   const { jobs, loadMoreJobs, showLoadMore } = useJobs();
   const navigate = useNavigate();
@@ -80,7 +89,7 @@ function Home({ onApply }) {
   );
 }
 
-// Apply wrapper: ensures jobId, jobTitle, and companyName are stored correctly
+/* --- Apply Wrapper --- */
 function ApplyWrapper({ onClose }) {
   const { jobId } = useParams();
   const location = useLocation();
@@ -95,7 +104,6 @@ function ApplyWrapper({ onClose }) {
     if (!currentUser) throw new Error("You must be logged in to apply.");
     if (!cvFile) throw new Error("No file selected.");
 
-    // Upload resume
     const storageRef = ref(
       storage,
       `resumes/${jobId}/${Date.now()}_${cvFile.name}`
@@ -103,7 +111,6 @@ function ApplyWrapper({ onClose }) {
     await uploadBytes(storageRef, cvFile);
     const downloadURL = await getDownloadURL(storageRef);
 
-    // Save application data
     const applicationsCollection = collection(db, "applications");
     await addDoc(applicationsCollection, {
       userId: currentUser.uid,
@@ -129,13 +136,13 @@ function ApplyWrapper({ onClose }) {
   );
 }
 
+/* --- App Component --- */
 function App() {
   const navigate = useNavigate();
   const [currentUser, loadingUser] = useAuthState(auth);
 
   if (loadingUser) return <p className="p-8 text-center">Loading user...</p>;
 
-  //  Pass jobId, jobTitle, and companyName when applying
   const handleApply = (jobId, jobTitle, companyName) => {
     navigate(`/apply/${jobId}`, { state: { jobTitle, companyName } });
   };
@@ -147,6 +154,9 @@ function App() {
         onSignupClick={() => navigate("/signup")}
         currentUser={currentUser}
       />
+
+      {/* ScrollToTop ensures route changes scroll to top */}
+      <ScrollToTop />
 
       <Routes>
         <Route path="/" element={<Home onApply={handleApply} />} />
@@ -210,7 +220,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Placeholder routes */}
+        {/* Footer routes */}
         <Route path="/profile/create" element={<ProfileBuilder />} />
         <Route path="/jobs" element={<BrowseJobs />} />
         <Route path="/thank-you" element={<ThankYouPage />} />
@@ -218,30 +228,17 @@ function App() {
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/career-tips" element={<CareerTips />} />
         <Route path="/news" element={<HealthcareNews />} />
-  <Route path="/blog" element={<Blog />} />
-  <Route path="/faq" element={<FAQ />} />
-  <Route path= "/privacy" element={<PrivacyPolicy />} />
-        <Route path= "/terms"  element={<TermsOfService />} />
-<Route path="/profile/complete" element={<CompleteProfile />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/blog/:id" element={<BlogPost />} />
+        <Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/resources/career" element={<PlaceholderPage />} />
-        <Route path="/resume-builder" element={<PlaceholderPage />} />
         <Route path="/resources/interview-tips" element={<PlaceholderPage />} />
         <Route path="/employers/post-job" element={<PlaceholderPage />} />
         <Route path="/employers/search" element={<PlaceholderPage />} />
-        <Route path="/pricing" element={<PlaceholderPage />} />
-        <Route path="/employers/services" element={<PlaceholderPage />} />
         <Route path="/employers/dashboard" element={<PlaceholderPage />} />
-        <Route path="/resources/salary-guide" element={<PlaceholderPage />} />
-        <Route
-          path="/resources/industry-reports"
-          element={<PlaceholderPage />}
-        />
-        <Route path="/news" element={<PlaceholderPage />} />
-        <Route path="/blog" element={<PlaceholderPage />} />
-        <Route path="/faq" element={<PlaceholderPage />} />
-        <Route path="/help" element={<PlaceholderPage />} />
-        <Route path="/privacy" element={<PlaceholderPage />} />
-        <Route path="/terms" element={<PlaceholderPage />} />
       </Routes>
 
       <Footer />
