@@ -25,6 +25,20 @@ import { Contact } from "./components/pages/Contact";
 import {About}  from "./components/pages/About";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { PlaceholderPage } from "./components/pages/PlaceholderPage";
+import ProfileBuilder from "./components/footercomponent/ProfileBuilder";
+import BrowseJobs from "./components/footercomponent/BrowseJob";
+import { ThankYouPage } from "./components/footercomponent/ThankYouPage";
+import { CompleteProfile } from "./components/footercomponent/CompleteProfile";
+import ProfileView from "./components/pages/ProfileView";
+import ResumeBuilder from "./components/pages/ResumeBuilder";
+import CareerTips from "./components/pages/CareerTips";
+import HealthcareNews from "./components/pages/HealthcareNews";
+import Blog from "./components/pages/Blog";
+import FAQ from "./components/pages/FAQ";
+import PrivacyPolicy from "./components/pages/PrivacyPolicy";
+import TermsOfService from "./components/pages/TermsOfService";
+
+
 
 // Firebase
 import { db, storage, auth } from "./firebaseConfig";
@@ -197,7 +211,18 @@ function App() {
         <Route path="/contact" element={<Contact />} />
 
         {/* Placeholder routes */}
-        <Route path="/profile/create" element={<PlaceholderPage />} />
+        <Route path="/profile/create" element={<ProfileBuilder />} />
+        <Route path="/jobs" element={<BrowseJobs />} />
+        <Route path="/thank-you" element={<ThankYouPage />} />
+        <Route path="/profile" element={<ProfileView />} />
+        <Route path="/resume-builder" element={<ResumeBuilder />} />
+        <Route path="/career-tips" element={<CareerTips />} />
+        <Route path="/news" element={<HealthcareNews />} />
+  <Route path="/blog" element={<Blog />} />
+  <Route path="/faq" element={<FAQ />} />
+  <Route path= "/privacy" element={<PrivacyPolicy />} />
+        <Route path= "/terms"  element={<TermsOfService />} />
+<Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/resources/career" element={<PlaceholderPage />} />
         <Route path="/resume-builder" element={<PlaceholderPage />} />
         <Route path="/resources/interview-tips" element={<PlaceholderPage />} />

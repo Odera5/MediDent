@@ -10,9 +10,8 @@ export function Footer() {
       links: [
         { name: "Browse Jobs", path: "/jobs" },
         { name: "Create Profile", path: "/profile/create" },
-        { name: "Career Resources", path: "/resources/career" },
         { name: "Resume Builder", path: "/resume-builder" },
-        { name: "Interview Tips", path: "/resources/interview-tips" },
+        { name: "Career Tips", path: "/career-tips" },
       ],
     },
     {
@@ -20,16 +19,12 @@ export function Footer() {
       links: [
         { name: "Post a Job", path: "/employers/post-job" },
         { name: "Search Candidates", path: "/employers/search" },
-        { name: "Pricing Plans", path: "/pricing" },
-        { name: "Recruitment Services", path: "/employers/services" },
         { name: "Employer Dashboard", path: "/employers/dashboard" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { name: "Salary Guide", path: "/resources/salary-guide" },
-        { name: "Industry Reports", path: "/resources/industry-reports" },
         { name: "Healthcare News", path: "/news" },
         { name: "Blog", path: "/blog" },
         { name: "FAQ", path: "/faq" },
@@ -39,7 +34,6 @@ export function Footer() {
       title: "Company",
       links: [
         { name: "About Us", path: "/about" },
-        { name: "Help Center", path: "/help" },
         { name: "Contact Support", path: "/contact" },
         { name: "Privacy Policy", path: "/privacy" },
         { name: "Terms of Service", path: "/terms" },
@@ -62,7 +56,7 @@ export function Footer() {
   return (
     <footer className="bg-blue-900 text-white py-12">
       <div className="max-w-6xl mx-auto px-8">
-        {/* Footer links */}
+        {/* Footer Links */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8"
           initial="hidden"
@@ -92,7 +86,7 @@ export function Footer() {
           ))}
         </motion.div>
 
-        {/* Branding + copyright */}
+        {/* Branding + Copyright */}
         <motion.div
           className="border-t border-white/20 pt-8 text-center"
           initial={{ opacity: 0, y: 20 }}
