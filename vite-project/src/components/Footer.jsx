@@ -1,9 +1,12 @@
 import React from "react";
 import { Heart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { auth } from "../firebaseConfig"; 
 
-export function Footer() {
+export function Footer({ openLoginModal }) {
+  const navigate = useNavigate();
+
   const footerSections = [
     {
       title: "For Job Seekers",
@@ -17,9 +20,10 @@ export function Footer() {
     {
       title: "For Employers",
       links: [
-        { name: "Post a Job", path: "/employers/post-job" },
+        { name: "Post a Job", path: "/post-job" },
         { name: "Search Candidates", path: "/employers/search" },
-        { name: "Employer Dashboard", path: "/employers/dashboard" },
+        // 👇 Smart Employer Dashboard
+        { name: "Employer Dashboard", action: "dashboard" },
       ],
     },
     {
@@ -53,6 +57,22 @@ export function Footer() {
     hover: { scale: 1.05, color: "#14B8A6" },
   };
 
+  // Handle Employer Dashboard Click
+  const handleEmployerDashboardClick = () => {
+    const user = auth.currentUser;
+    if (user) {
+      // Logged in → Go to real dashboard
+      navigate("/dashboard");
+    } else {
+      // Not logged in → open login modal
+      if (openLoginModal) {
+        openLoginModal();
+      } else {
+        navigate("/login", { state: { from: "/dashboard" } });
+      }
+    }
+  };
+
   return (
     <footer className="bg-blue-900 text-white py-12">
       <div className="max-w-6xl mx-auto px-8">
@@ -73,12 +93,21 @@ export function Footer() {
                     variants={linkVariants}
                     whileHover="hover"
                   >
-                    <Link
-                      to={link.path}
-                      className="text-white/80 hover:text-teal-400 transition-colors"
-                    >
-                      {link.name}
-                    </Link>
+                    {link.action === "dashboard" ? (
+                      <button
+                        onClick={handleEmployerDashboardClick}
+                        className="text-white/80 hover:text-teal-400 transition-colors"
+                      >
+                        {link.name}
+                      </button>
+                    ) : (
+                      <Link
+                        to={link.path}
+                        className="text-white/80 hover:text-teal-400 transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </motion.li>
                 ))}
               </ul>
@@ -105,10 +134,10 @@ export function Footer() {
             >
               <Heart className="w-5 h-5" />
             </motion.div>
-            <span className="text-2xl font-semibold">LumiaGlobe</span>
+            <span className="text-2xl font-semibold">CareClime</span>
           </motion.div>
           <p className="text-white/80">
-            &copy; {new Date().getFullYear()} LumiaGlobe. All rights reserved.
+            &copy; {new Date().getFullYear()} CareClime. All rights reserved.
             Empowering healthcare careers across Nigeria.
           </p>
         </motion.div>

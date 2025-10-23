@@ -11,7 +11,7 @@ import {
 import { auth, db } from "../../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function LoginModal({
   isOpen,
@@ -26,8 +26,9 @@ export function LoginModal({
     rememberMe: false,
   });
 
-  const [isResetting, setIsResetting] = useState(false); // loading state for reset
+  const [isResetting, setIsResetting] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const redirectPath = location.state?.from || "/";
 
   const handleSubmit = async (e) => {
@@ -49,10 +50,19 @@ export function LoginModal({
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        toast.success(`Welcome back, ${userData.fullName || "User"}!`);
-        onClose();
-        if (onLoginSuccess) onLoginSuccess(user);
-        if (onSuccessRedirect) onSuccessRedirect(redirectPath);
+
+        //  Check user role
+        if (userData.role === "employer") {
+          localStorage.setItem("employerToken", user.uid); // store employer session
+          toast.success(`Welcome back, ${userData.fullName || "Employer"}!`);
+          onClose();
+          navigate("/employers/dashboard");
+        } else {
+          toast.success(`Welcome back, ${userData.fullName || "User"}!`);
+          onClose();
+          if (onLoginSuccess) onLoginSuccess(user);
+          if (onSuccessRedirect) onSuccessRedirect(redirectPath);
+        }
       } else {
         toast.error("Profile not found. Please contact support.");
         await signOut(auth);

@@ -70,14 +70,14 @@ export function Header({ onLoginClick, onSignupClick, currentUser }) {
             >
               <Heart className="w-5 h-5" />
             </motion.div>
-            LumiaGlobe Jobs
+            CareClime
           </motion.div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-8">
             <Link to="/" className={linkClasses("/")}>Home</Link>
             <button onClick={handleFindJobsClick} className={linkClasses("/jobs")}>
-              Find Jobs
+              Jobs
             </button>
             <Link to="/post-job" className={linkClasses("/hospitals")}>For Hospitals</Link>
             <Link to="/about" className={linkClasses("/about")}>About</Link>

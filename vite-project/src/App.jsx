@@ -38,6 +38,7 @@ import FAQ from "./components/pages/FAQ";
 import PrivacyPolicy from "./components/pages/PrivacyPolicy";
 import TermsOfService from "./components/pages/TermsOfService";
 import BlogPost from "./components/pages/BlogPost";
+import SearchCandidates from "./components/pages/SearchCandidates";
 
 // Firebase
 import { db, storage, auth } from "./firebaseConfig";
@@ -155,7 +156,6 @@ function App() {
         currentUser={currentUser}
       />
 
-      {/* ScrollToTop ensures route changes scroll to top */}
       <ScrollToTop />
 
       <Routes>
@@ -216,28 +216,32 @@ function App() {
           }
         />
 
-        {/* Pages */}
+        {/* Static pages */}
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Footer routes */}
+        {/* Footer and utility pages */}
         <Route path="/profile/create" element={<ProfileBuilder />} />
         <Route path="/jobs" element={<BrowseJobs />} />
         <Route path="/thank-you" element={<ThankYouPage />} />
         <Route path="/profile" element={<ProfileView />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/career-tips" element={<CareerTips />} />
+        <Route path="/profile/complete" element={<CompleteProfile />} />
+
+        {/* Blog & News */}
         <Route path="/news" element={<HealthcareNews />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogPost />} />
+
+        {/* Other pages */}
         <Route path="/faq" element={<FAQ />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
-        <Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/resources/career" element={<PlaceholderPage />} />
         <Route path="/resources/interview-tips" element={<PlaceholderPage />} />
         <Route path="/employers/post-job" element={<PlaceholderPage />} />
-        <Route path="/employers/search" element={<PlaceholderPage />} />
+        <Route path="/employers/search" element={<SearchCandidates />} />
         <Route path="/employers/dashboard" element={<PlaceholderPage />} />
       </Routes>
 

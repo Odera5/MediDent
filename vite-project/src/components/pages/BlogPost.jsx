@@ -61,15 +61,15 @@ export default function BlogPost() {
           {post.title}
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          {post.date
-            ? new Date(post.date.seconds * 1000).toLocaleDateString("en-NG", {
+          {post.timestamp
+            ? new Date(post.timestamp.seconds * 1000).toLocaleString("en-NG", {
                 dateStyle: "medium",
                 timeStyle: "short",
               })
             : ""}
         </p>
         <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-          {post.content}
+          {post.content || post.summary || "No content provided."}
         </p>
 
         <div className="mt-10">

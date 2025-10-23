@@ -11,7 +11,8 @@ export default function Blog() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const q = query(collection(db, "blogPosts"), orderBy("date", "desc"));
+        // ✅ Use 'timestamp' instead of 'date'
+        const q = query(collection(db, "blogPosts"), orderBy("timestamp", "desc"));
         const snapshot = await getDocs(q);
         const fetchedPosts = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -65,11 +66,11 @@ export default function Blog() {
               </h3>
               <p className="text-gray-700 mb-3">{post.summary}</p>
               <p className="text-sm text-gray-500 mb-4">
-                {post.date
-                  ? new Date(post.date.seconds * 1000).toLocaleDateString(
-                      "en-NG",
-                      { dateStyle: "medium" }
-                    )
+                {post.timestamp
+                  ? new Date(post.timestamp.seconds * 1000).toLocaleString("en-NG", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })
                   : ""}
               </p>
               <Link

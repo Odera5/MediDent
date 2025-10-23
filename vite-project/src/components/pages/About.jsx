@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 export function About() {
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const fullText = "About LumiaGlobe Jobs";
+  const fullText = "About CareClime";
 
   // Typing effect (runs once)
   useEffect(() => {
@@ -60,7 +60,7 @@ export function About() {
         </div>
 
         <p className="text-lg mb-6 leading-relaxed text-center opacity-90 max-w-3xl mx-auto">
-          LumiaGlobe Jobs is Nigeria’s leading healthcare recruitment platform,
+          CareClime is Nigeria’s leading healthcare recruitment platform,
           connecting skilled medical professionals with trusted hospitals across
           the country. We aim to make healthcare hiring simple, transparent, and
           impactful for both employers and job seekers.
